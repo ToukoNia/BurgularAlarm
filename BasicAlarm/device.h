@@ -9,7 +9,7 @@ class Device {
     bool status;
    // char[] name;
   public:
-    void createDevice(int pinNo, bool currentStatus);
+    void createDevice(int pinNo, bool currentStatus, int type);
     bool getStatus();
 };
 
@@ -32,9 +32,11 @@ class Buzzer: public Device {
 };
 
 class LED: public Device{  
-  public:
+  private:
     void turnOn();
     void turnOff();
+  public:
+    void changeState();
 };
 
 #endif
