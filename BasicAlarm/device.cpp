@@ -4,13 +4,12 @@ void Device::createDevice(int pinNo, bool currentStatus, int type){
   pinNumber=pinNo;
   status=currentStatus;
   if (!type){
-    pinMode(pinNumber,INPUT);
-  } else if (type==1){
     pinMode(pinNumber, OUTPUT);
-  } else{
+  } else if (type==1){
     pinMode(pinNumber, INPUT_PULLUP);
+  } else { //switch to switchcase
+    pinMode(pinNumber,INPUT);
   }
-  
 }
 
 bool Device::getStatus(){
@@ -19,6 +18,9 @@ bool Device::getStatus(){
 
 
 bool Sensor::readFromSensor(){
+  if (status==1){
+    return !digitalRead(pinNumber);
+  }
   return digitalRead(pinNumber);
 }
 

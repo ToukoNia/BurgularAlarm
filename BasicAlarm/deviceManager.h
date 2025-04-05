@@ -13,7 +13,7 @@ class SensorManager {
     int head=0; int tail=0; int i;
     Sensor sensors[MAX_IO];
   public:
-    void addSensor(int pinNo, int type);
+    void addSensor(int pinNo, bool logic, int type);
     void removeSensor(int number);
     bool checkSensors();
     int getNumber();

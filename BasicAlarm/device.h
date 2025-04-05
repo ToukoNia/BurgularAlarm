@@ -34,9 +34,9 @@ class Buzzer: public Device {
 class LED: public Device{  
   private:
     void turnOn();
-    void turnOff();
   public:
     void changeState();
+    void turnOff();
 };
 
 #endif
