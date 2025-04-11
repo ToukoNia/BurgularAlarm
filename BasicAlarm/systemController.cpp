@@ -10,25 +10,38 @@ void SystemController::setup(){
 void SystemController::armSystem(){
   Locks.lockAll();
   timeStamp=millis();
-  while (timeStamp+ALARM_DELAY*1000>millis()); //checkLogin
+  while (timeStamp+ALARM_DELAY*1000>millis()){
+    if (Login()){
+      Locks.unlockAll();
+      return;
+    }
+  } 
   while (!Sensors.checkSensors());  //&& !checkLogin
   if (Sensors.checkSensors()){
     timeStamp=millis();
     while (timeStamp+ALARM_DELAY*1000>millis()){
-      //check login code
+    if (Login()){
+      Locks.unlockAll();
+      return;
+    }
     }
     raiseAlarm();
   }
 }
 
-void SystemController::raiseAlarm(){
+bool SystemController::raiseAlarm(){
     Alarm.triggerAlarm();
     timeStamp=millis();
     while(millis()<timeStamp+ALARM_LENGTH*1000){
       Alarm.maintainAlarm();
-      //check login Code
+      if (Login()){
+        Locks.unlockAll();
+        Alarm.stopAlarm();
+        return 1;
+      }
     }
     Alarm.stopAlarm(); 
+    return 0;
 }
 
 void SystemController::testSystem(){
@@ -37,9 +50,19 @@ void SystemController::testSystem(){
   raiseAlarm();
 }
 
+bool SystemController::Login(){
+  if(communicator.checkLogin()){
+    username=communicator.checkUsername();
+    password=communicator.checkPassword();
+  } if (password=="Cheese"){
+    return 1;
+  } else{
+    return 0;
+  }
+}
 
 String SerialController::checkState(){
-  Serial.println("Check Login");
+  Serial.println("Check State");
   while (!(Serial.available()>0));
   message=Serial.readStringUntil("\n");
   message.trim();
@@ -48,12 +71,11 @@ String SerialController::checkState(){
 
 bool SerialController::checkLogin(){
   Serial.println("Check Login");
-  while (!(Serial.available()>0));
-  message=Serial.readStringUntil("\n");
-  message.trim();
-  if (message=="1"){
-    return 1;
-  } 
+  if(Serial.available() > 0){
+    message = Serial.readStringUntil('\n');
+    message.trim();
+    return (message=="1");
+  }
   return 0;
 }
 

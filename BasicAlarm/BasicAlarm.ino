@@ -11,12 +11,7 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  if(communicator.checkLogin()){
-    username=communicator.checkUsername();
-    password=communicator.checkPassword();
-  };
-  if (password=="Cheese"){
+  if (sys.Login()){
     digitalWrite(3,1);
   }
 }
