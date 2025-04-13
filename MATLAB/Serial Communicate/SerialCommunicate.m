@@ -4,15 +4,42 @@ configureTerminator(arduino,"CR/LF")
 
 
 while (1) 
-    if (readline(arduino)=="User Logged in") %need to add something like activating in 30 seconds, and then activate
-        armSystem = input("Press A to arm the system: ","s");
+    message=readline(arduino);
+    if (message=="User Logged in") %need to add something like activating in 30 seconds, and then activate
+        armSystem = input("Press A to arm the system, or L to logout: ","s");
         writeline(arduino,armSystem);
-    end
-    if (readline(arduino)=="Admin Logged in")
-        systemChoice=input("[A]rm the system, [T]est the system, [U]pdate credentials: ","s");
+    elseif (message=="Admin Logged in")
+        systemChoice=input("[A]rm the system, [T]est the system, [U]pdate credentials or [L]ogout: ","s");
         writeline(arduino,systemChoice);
-    end
-    if (readline(arduino)=="Check Login")
+        if (systemChoice=="U")
+            systemChoice=input("[A]dd or [R]emove a user: ","s");
+            while(1)
+                if (readline(arduino)=="Add or Remove")
+                    writeline(arduino,systemChoice);
+                    break
+                end
+            end
+            username=input("Username: ","s");
+
+            while(1)
+              if (readline(arduino)=="Get Username")
+                    writeline(arduino,username);
+                    break
+              end
+            end
+            if systemChoice=="A"
+                systemChoice=input("Type 1 if admin: ","s");
+                while(1)
+                    if (readline(arduino)=="Get Admin")
+                        writeline(arduino,systemChoice);
+                        break
+                    end
+                end
+            else
+                disp(readline(arduino));
+            end
+        end
+    elseif (message=="Check Login")
         username=input("Username: ","s");
         password=input("Password: ","s");
         writeline(arduino,"1");
@@ -29,7 +56,6 @@ while (1)
              end
         end
     end
-    break
 end
 
 

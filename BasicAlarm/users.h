@@ -12,29 +12,21 @@ class User {
     void updateCredentials(String ID, bool admin);
 };
 
-class UserManager { 
-  private:
-    User users[MAX_USERS]; int head=0; int tail=0;
-    int searchUsers(String UserID); int i; 
-  public:
-    void addUser(String userID, bool admin);
-    void removeUser(String userID);
-    bool isAdmin(String userID);
-};
-
 class AuthenticationManager{
   private:
     int maxAttempts;
-    int lockoutAttempts;
-    int attemptNumber;
+    int attemptNumber=0;
     String pin;
-    UserManager users;
+    User users[MAX_USERS]; int head=0; int tail=0;
+    int searchUsers(String UserID); int i; 
+
   public:
     int authenticate(String userID, String pinAttempt);
     void updatePin(String newPin);
-    void updateAttempts(int attempts);
+    void updateMaxAttempts(int attempts);
     void addUser(String userID, bool isAdmin);
-    void removeUser(String userID);
-   // void updateUser(String userID);
+    bool removeUser(String userID);
+    void Setup(String newPin,int attempts, String userID);
+    void resetAttempts();
 };
 #endif 

@@ -14,13 +14,8 @@ bool User::checkName(String ID){
   }
   return 0;
 }
-void UserManager::addUser(String userID, bool admin){
-  users[head] = User();
-  users[head].updateCredentials(userID, admin);  //change to constructors at somepoint
-  head++;
-}
 
-int UserManager::searchUsers(String UserID){  //hashmap later?
+int AuthenticationManager::searchUsers(String UserID){  //hashmap later?
   for (i=0; i < head; i++) {
     if (users[i].checkName(UserID)){
       return i;
@@ -29,39 +24,52 @@ int UserManager::searchUsers(String UserID){  //hashmap later?
   return -1;
 }
 
-void UserManager::removeUser(String userID) { //make have an error code for unfound value
+int AuthenticationManager::authenticate(String userID, String pinAttempt){
+  if (attemptNumber<maxAttempts){
+    if (pin==pinAttempt){
+      attemptNumber=0;
+      return (1+users[searchUsers(userID)].adminCheck());
+    }
+    attemptNumber++;
+    return 0;
+  }
+  return -1;
+}
+
+void AuthenticationManager::resetAttempts(){
+  attemptNumber=0;
+}
+
+void AuthenticationManager::addUser(String userID, bool admin){
+  users[head] = User();
+  users[head].updateCredentials(userID, admin);  //change to constructors at somepoint
+  head++;
+}
+
+bool AuthenticationManager::removeUser(String userID){
   tail = searchUsers(userID);
   if (tail<0){
-    return;
+    return 0;
   }
   for (i = tail + 1; i < head; i++) {
     users[tail] = users[i];
     tail++;
   }
   head--;
+  return 1;
 }
 
-int AuthenticationManager::authenticate(String userID, String pinAttempt){
-  if (pin==pinAttempt){
-    return (1+users.isAdmin(userID));
-  }
-  return 0;
-}
-
-void AuthenticationManager::addUser(String userID, bool isAdmin){
-  users.addUser(userID, isAdmin);
-}
-
-void AuthenticationManager::removeUser(String userID){
-  users.removeUser(userID);
-}
-
-void AuthenticationManager::updateAttempts(int attempts){
-  attemptNumber=attempts;
+void AuthenticationManager::updateMaxAttempts(int attempts){
+  maxAttempts=attempts;
 }
 
 void AuthenticationManager::updatePin(String newPin){
   pin=newPin;
 }
 
+void AuthenticationManager::Setup(String newPin,int attempts, String userID){
+  addUser(userID,1);
+  updateMaxAttempts(attempts);
+  updatePin(newPin);
+}
 

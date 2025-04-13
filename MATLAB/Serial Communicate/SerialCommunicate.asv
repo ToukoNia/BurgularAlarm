@@ -4,14 +4,24 @@ configureTerminator(arduino,"CR/LF")
 
 
 while (1) 
-    if (readline(arduino)=="User Logged in")
+    message=readline(arduino)
+    if (message=="User Logged in") %need to add something like activating in 30 seconds, and then activate
         armSystem = input("Press A to arm the system: ","s");
         writeline(arduino,armSystem);
-    end
-    if (readline(arduino)=="Admin Logged in")
-        systemChoice=input("[A]rm the system, [T]est the system, [U]pdate users: ","s");
+    elseif (message=="Admin Logged in")
+        systemChoice=input("[A]rm the system, [T]est the system, [U]pdate credentials: ","s");
         writeline(arduino,systemChoice);
-    if (readline(arduino)=="Check Login")
+        if (systemChoice=="U")
+            systemChoice=input("Add or Remove");
+            while(1)
+                if (readline(arduino)=="Add or Remove")
+                    writeline(arduino,systemChoice);
+                    break
+                end
+            end
+            if systemChoice=="Add"
+
+    elseif (message=="Check Login")
         username=input("Username: ","s");
         password=input("Password: ","s");
         writeline(arduino,"1");
@@ -28,7 +38,6 @@ while (1)
              end
         end
     end
-    break
 end
 
 

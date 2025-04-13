@@ -2,6 +2,7 @@
 #ifndef SystemController_h
 #define SystemController_h
 #include <Arduino.h>
+#include "users.h"
 #include "deviceManager.h"
 #define ALARM_DELAY 10
 #define ALARM_LENGTH 1
@@ -12,11 +13,8 @@ class SerialController {
     unsigned long timeStamp;
     const unsigned long SERIAL_TIMEOUT = 50; 
   public:
-    bool checkLogin();
-    String checkState();
-    void changeDisplay();
-    String checkUsername();
-    String checkPassword();
+    bool checkSerial(String prompt);
+    String getSerial(String prompt);
 };
 
 class SystemController { 
@@ -25,14 +23,16 @@ class SystemController {
     LockManager Locks;
     AlarmManager Alarm;
     SerialController communicator;
+    AuthenticationManager Users;
     String username; String password;
-    long timeStamp=0; 
+    long timeStamp=0; int flag;
   public:
     void setup();
     void armSystem();
     bool raiseAlarm();
     void testSystem();
-    bool Login();
+    int Login();
+    bool manageUsers(int type, String userID);
 };
 
 
