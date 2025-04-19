@@ -4,7 +4,7 @@
 SystemController sys;
 SerialController communicator;
 String message; String username;
-bool flag;
+bool flag; int value;
 void setup() {
   sys.setup();
   sys.manageUsers(1,"Mumin");
@@ -12,7 +12,7 @@ void setup() {
 }
 
 void loop() {
-  
+  //basic TUI, needs to have the facial recognition implemented and add the ability to change the number of attempts, pin, sensors, locks etc
   int login=sys.Login();
   if (login==1){
     flag=1;
@@ -40,8 +40,11 @@ void loop() {
           message=communicator.getSerial("Get Admin");
           sys.manageUsers((1+(message=="1")), username);
         } else{//put something to print out all users
-            if (sys.manageUsers(0,username)){
+            value=sys.manageUsers(0,username);
+            if (value==1){
               Serial.print(username); Serial.println(" has been successfully deleted.");
+            } else if (value==-1){
+              Serial.print(username); Serial.println(" is the last admin, and so cannot be deleted.");
             } else{
               Serial.print(username); Serial.println(" is not a valid user.");
             }

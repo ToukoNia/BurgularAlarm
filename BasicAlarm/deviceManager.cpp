@@ -1,6 +1,6 @@
 #include "deviceManager.h"
 
-void SensorManager::addSensor(int pinNo, bool logic, int type) {
+void SensorManager::addSensor(int pinNo, bool logic, int type) {  //adds sensors
   sensors[head] = Sensor();
   sensors[head].createDevice(pinNo, logic, type);  //change to constructors at somepoint
   head++;

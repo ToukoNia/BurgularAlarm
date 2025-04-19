@@ -42,7 +42,7 @@ void SystemController::armSystem(){
 }
 
 
-bool SystemController::raiseAlarm(){
+bool SystemController::raiseAlarm(){  //simple code that manages maintaining and creating the alarm (note, might be a better idea to destroy the alarm manager and to fit it here)
     Alarm.triggerAlarm();
     timeStamp=millis();
     while(millis()<timeStamp+ALARM_LENGTH*1000){
@@ -57,7 +57,7 @@ bool SystemController::raiseAlarm(){
     return 0;
 }
 
-void SystemController::testSystem(){
+void SystemController::testSystem(){  //test system code will go here
   Locks.lockAll();
   timeStamp=millis();
   raiseAlarm();
@@ -72,7 +72,7 @@ bool SystemController::manageUsers(int type, String userID){ //0 denotes remove 
   }
 }
 
-int SystemController::Login(){
+int SystemController::Login(){  //Login code to facilitate loggin in
   if(communicator.checkSerial("Check Login")){
     username=communicator.getSerial("Check Username");
     password=communicator.getSerial("Check Password");
@@ -81,7 +81,7 @@ int SystemController::Login(){
   return 0;
 }
 
-bool SerialController::checkSerial(String prompt){
+bool SerialController::checkSerial(String prompt){  //checks the serial bus to see if there is a message and if that message equals 1
   Serial.println(prompt);
   if(Serial.available() > 0){
     message = Serial.readStringUntil('\n');
@@ -91,9 +91,9 @@ bool SerialController::checkSerial(String prompt){
   return 0;
 }
 
-String SerialController::getSerial(String prompt){
+String SerialController::getSerial(String prompt){  //gets the serial by prompting with the above prompt and then manages it
   Serial.println(prompt);
-  while (!(Serial.available()>0));  //timeout to be added
+  while (!(Serial.available()>0));  //waits for a response (NOTE: this is only called when the system knows for sure its getting a response)
   message=Serial.readStringUntil("\n");
   message.trim();
   return message;

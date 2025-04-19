@@ -19,13 +19,14 @@ class AuthenticationManager{
     String pin;
     User users[MAX_USERS]; int head=0; int tail=0;
     int searchUsers(String UserID); int i; 
+    int adminCount;
 
   public:
     int authenticate(String userID, String pinAttempt);
     void updatePin(String newPin);
     void updateMaxAttempts(int attempts);
     void addUser(String userID, bool isAdmin);
-    bool removeUser(String userID);
+    int removeUser(String userID);
     void Setup(String newPin,int attempts, String userID);
     void resetAttempts();
 };

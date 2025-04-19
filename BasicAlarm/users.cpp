@@ -4,11 +4,11 @@ void User::updateCredentials(String ID, bool admin){  //change to constructor
   userID=ID;
   isAdmin=admin;
 }
-bool User::adminCheck(){
+bool User::adminCheck(){  //returns if user is admin
   return isAdmin;
 }
 
-bool User::checkName(String ID){
+bool User::checkName(String ID){  //allows us to check if a user is the user we are looking for
   if (ID==userID){
     return 1;
   }
@@ -16,7 +16,7 @@ bool User::checkName(String ID){
 }
 
 int AuthenticationManager::searchUsers(String UserID){  //hashmap later?
-  for (i=0; i < head; i++) {
+  for (i=0; i < head; i++) {  //searches the users to find the index given a set user ID
     if (users[i].checkName(UserID)){
       return i;
     }
@@ -24,7 +24,7 @@ int AuthenticationManager::searchUsers(String UserID){  //hashmap later?
   return -1;
 }
 
-int AuthenticationManager::authenticate(String userID, String pinAttempt){
+int AuthenticationManager::authenticate(String userID, String pinAttempt){  //authenticate the user and return if authenticated, with the level of permits
   if (attemptNumber<maxAttempts){
     if (pin==pinAttempt){
       attemptNumber=0;
@@ -36,20 +36,30 @@ int AuthenticationManager::authenticate(String userID, String pinAttempt){
   return -1;
 }
 
-void AuthenticationManager::resetAttempts(){
+void AuthenticationManager::resetAttempts(){  //resets the attempt lock on a successful login etc (I cannot remember why I needed this or where, something that might be needed later)
   attemptNumber=0;
 }
 
-void AuthenticationManager::addUser(String userID, bool admin){
+void AuthenticationManager::addUser(String userID, bool admin){ //adds a user
   users[head] = User();
   users[head].updateCredentials(userID, admin);  //change to constructors at somepoint
   head++;
+  if (admin){ //tracks the admin count
+    adminCount++;
+  }
 }
 
-bool AuthenticationManager::removeUser(String userID){
+int AuthenticationManager::removeUser(String userID){ //removes a user, and outputs if failed bc last admin or if user cannot be found
   tail = searchUsers(userID);
   if (tail<0){
     return 0;
+  }
+  if (users[tail].adminCheck()){
+    if (adminCount>1){
+      adminCount--;
+    } else{
+      return -1;
+    }
   }
   for (i = tail + 1; i < head; i++) {
     users[tail] = users[i];
@@ -59,7 +69,7 @@ bool AuthenticationManager::removeUser(String userID){
   return 1;
 }
 
-void AuthenticationManager::updateMaxAttempts(int attempts){
+void AuthenticationManager::updateMaxAttempts(int attempts){  //allows for updating the pin information to update the number of max attempts
   maxAttempts=attempts;
 }
 
