@@ -3,7 +3,7 @@
 #define ALARM_DELAY 10
 SystemController sys;
 SerialController communicator;
-String message; String username;
+String message; String username; String temp; String temp1; String temp2;
 bool flag; int value;
 void setup() {
   sys.setup();
@@ -13,8 +13,8 @@ void setup() {
 
 void loop() {
   //basic TUI, needs to have the facial recognition implemented and add the ability to change the number of attempts, pin, sensors, locks etc
-  int login=sys.Login();
-  if (login==1){
+  int login=sys.Login();  //logs in
+  if (login==1){  //if user logged in
     flag=1;
     while (flag){
       message=communicator.getSerial("User Logged in");
@@ -25,16 +25,18 @@ void loop() {
       }
     }
     
-  } else if (login==2){
+  } else if (login==2){ //if an admin logged in
     flag=1;
     while(flag){
       message=communicator.getSerial("Admin Logged in");
-      if (message=="A"){
+      if (message=="A"){  //arm the system
         digitalWrite(3,1);
-      } else if (message=="T"){
+      } else if (message=="T"){ //test the system
         digitalWrite(4,1);
-      } else if (message=="U"){
-        updateUsers();
+      } else if (message=="U"){ //update credentials
+        sys.updateUsers();
+      } else if (message=="D"){
+        sys.updateDevices();
       }
       else if (message=="L"){
         flag=0;
@@ -43,26 +45,7 @@ void loop() {
   } 
 }
 
-void updateUsers(){
-  message=communicator.getSerial("Add or Remove");
-    username=communicator.getSerial("Get Username");
-    if (message=="A"){
-      message=communicator.getSerial("Get Admin");
-      value = sys.manageUsers((1+(message=="1")), username);
-      if (value==1){
-        Serial.print(username); Serial.println(" has been successfully added.");
-      } else {
-        Serial.println("You are at the maximum number of users. Please delete a user to continue.");
-      }
-    } else{//put something to print out all users
-        value=sys.manageUsers(0,username);
-        if (value==1){
-          Serial.print(username); Serial.println(" has been successfully deleted.");
-        } else if (value==-1){
-          Serial.print(username); Serial.println(" is the current user, and so cannot be deleted.");
-        } else{
-          Serial.print(username); Serial.println(" is not a valid user.");
-        }
-      }
-}
+
+
+
 

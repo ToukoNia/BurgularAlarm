@@ -73,11 +73,63 @@ int SystemController::manageUsers(int type, String userID){ //0 denotes remove u
 
 int SystemController::Login(){  //Login code to facilitate loggin in
   if(communicator.checkSerial("Check Login")){
-    username=communicator.getSerial("Check Username");
+    name=communicator.getSerial("Check Username");
     password=communicator.getSerial("Check Password");
-    return Users.authenticate(username, password);
+    return Users.authenticate(name, password);
   }
   return 0;
+}
+
+void SystemController::updateUsers(){
+  message=communicator.getSerial("Add or Remove");  //gets the selected options from matlab
+  name=communicator.getSerial("Get Username");
+  if (message=="A"){
+    message=communicator.getSerial("Get Admin");  //gets if its an admin signing in
+    value = manageUsers((1+(message=="1")), name);  //add a new user w the permissions of the above message
+    if (value==1){  //error/success messages
+      Serial.print(name); Serial.println(" has been successfully added.");
+    } else {
+      Serial.println("You are at the maximum number of users. Please delete a user before adding a new one.");
+    }
+  } else{//put something to print out all users
+    value=manageUsers(0,name);  //delete the user
+    if (value==1){  //error messages
+      Serial.print(name); Serial.println(" has been successfully deleted.");
+    } else if (value==-1){
+      Serial.print(name); Serial.println(" is the current user, and so cannot be deleted.");
+    } else{
+      Serial.print(name); Serial.println(" is not a valid user.");
+    }
+  }
+}
+
+void SystemController::updateDevices(){ //might lowkey wanna switch this to be without so many temps lmao
+  message=communicator.getSerial("Add or remove");
+  if (message=="A"){
+    message=communicator.getSerial("Sensor or Lock");  //gets the selected options from matlab
+    temp=communicator.getSerial("Pin Number");
+    name=communicator.getSerial("Name");
+    if (message=="Sensor"){
+      temp1=communicator.getSerial("Logic");//1 for logic
+      temp2=communicator.getSerial("Standard or Pullup");//1 for pullup
+      return Sensors.addSensor(temp.toInt(), (temp1=="1"), (temp2=="1"+1), name);  
+    } else {
+      return Locks.addLock(temp.toInt(),name);
+    }
+  }
+  else{
+    //code to printout all of the desired or smthing (note: has to be in the if section or after it)
+    message=communicator.getSerial("Sensor or Lock");  //gets the selected options from matlab
+    if (message=="S"){
+      temp=communicator.getSerial("Sensor Number"); //gets the sensor number in teh array and removes it
+      Sensors.removeSensor(temp.toInt());
+      return 1;
+    }
+    temp=communicator.getSerial("Lock Number"); //same with locks
+    Locks.removeLock(temp.toInt());
+    return 1;
+  }
+  
 }
 
 bool SerialController::checkSerial(String prompt){  //checks the serial bus to see if there is a message and if that message equals 1

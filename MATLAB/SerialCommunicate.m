@@ -2,7 +2,6 @@ clear arduino
 arduino = serialport("COM15",9600); %sets up serial object
 configureTerminator(arduino,"CR/LF"); %sets the line terminators to the correct type to ensure successful reading
 
-
 while (1) 
     message=readline(arduino);  %see what state the arduino is in, is neccessary to know when logging in, logging out, and if armed/disarmed
     if (message=="User Logged in") %need to add something like activating in 30 seconds, and then activate
@@ -23,8 +22,8 @@ while (1)
             disp(readline(arduino));    %display success/error message to user for adding/removing, after the arduino has done the computation
         end
     elseif (message=="Check Login") %calls to see if there is a login
-        username=input("Username: ","s");
         password=input("Password: ","s");
+        username=Predict(50,'s01Test',newnet);
         writeline(arduino,"1"); %if there is a login write 1 to the arduino
         communicate(arduino,"Check Username",username) %then communicate to the arduino the username and password (NOTE: the username step will be changed when i add facial fully)
         communicate(arduino,"Check Password",password)

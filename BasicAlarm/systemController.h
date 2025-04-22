@@ -24,8 +24,8 @@ class SystemController {
     AlarmManager Alarm;
     SerialController communicator;
     AuthenticationManager Users;
-    String username; String password;
-    long timeStamp=0; int flag;
+    String name; String password; String message; String temp; String temp1; String temp2;
+    long timeStamp=0; int flag; int value;
   public:
     void setup();
     void armSystem();
@@ -33,6 +33,8 @@ class SystemController {
     void testSystem();
     int Login();
     int manageUsers(int type, String userID);
+    void updateDevices();
+    void updateUsers();
 };
 
 
