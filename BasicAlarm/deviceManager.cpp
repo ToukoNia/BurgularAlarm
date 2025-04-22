@@ -1,9 +1,18 @@
 #include "deviceManager.h"
 
-void SensorManager::addSensor(int pinNo, bool logic, int type) {  //adds sensors
-  sensors[head] = Sensor();
-  sensors[head].createDevice(pinNo, logic, type);  //change to constructors at somepoint
-  head++;
+bool SensorManager::addSensor(int pinNo, bool logic, int type, String name) {  //adds sensors
+  if (head<MAX_IO){
+    sensors[head] = Sensor();
+    sensors[head].createDevice(pinNo, logic, type, name);  //change to constructors at somepoint
+    head++;
+    return 1;
+  }
+  return 0;
+}
+
+void SensorManager::changeFobSensor(int pinNo, bool logic, int type, String name) {  //adds fobsensors
+    fobSensor = Sensor();
+    sensors[head].createDevice(pinNo, logic, type, name);  //change to constructors at somepoint
 }
 
 void SensorManager::removeSensor(int number) {
@@ -28,10 +37,14 @@ bool SensorManager::checkSensors() {
   return 0;
 }
 
-void LockManager::addLock(int pinNo) {
-  locks[head] = Lock();
-  locks[head].createDevice(pinNo, 0, 0);  //change to constructors at somepoint
-  head++;
+bool LockManager::addLock(int pinNo, String name) {
+  if (head<MAX_IO){
+    locks[head] = Lock();
+    locks[head].createDevice(pinNo, 0, 0,name);  //change to constructors at somepoint
+    head++;
+    return 1;
+  }
+  return 0;
 }
 
 void LockManager::removeLock(int number) {
@@ -60,8 +73,8 @@ void LockManager::unlockAll() {
 }
 
 void AlarmManager::setupAlarm() {
-  speaker.createDevice(BUZZER_PIN, 0, 0);
-  Beacon.createDevice(LED_PIN, 0, 0);
+  speaker.createDevice(BUZZER_PIN, 0, 0,"Buzzer");
+  Beacon.createDevice(LED_PIN, 0, 0,"Beacon");
 }
 
 void AlarmManager::maintainAlarm() {

@@ -1,9 +1,9 @@
 #include "systemController.h"
 void SystemController::setup(){
-  Sensors.addSensor(2,1,3);  //window
-  Sensors.addSensor(4,0,2);  //PIR  
-  //Sensors.addSensor(4,0,1);  //button
-  Locks.addLock(3);  //solenoid
+  Sensors.addSensor(2,1,3,"Window");  //window
+  Sensors.addSensor(4,0,2,"PIR Motion Detector");  //PIR  
+  Sensors.changeFobSensor(4,0,1,"Fob Button");  //button
+  Locks.addLock(3,"Solenoid");  //solenoid
   Alarm.setupAlarm();
   Users.Setup("Cheese",3,"Nia");
 }
@@ -63,10 +63,9 @@ void SystemController::testSystem(){  //test system code will go here
   raiseAlarm();
 }
 
-bool SystemController::manageUsers(int type, String userID){ //0 denotes remove user, 1/2 refers to add user of admin level 0/1
+int SystemController::manageUsers(int type, String userID){ //0 denotes remove user, 1/2 refers to add user of admin level 0/1
   if (type){
-    Users.addUser(userID,type-1);
-    return 1;
+    return Users.addUser(userID,type-1);
   } else{
     return Users.removeUser(userID);
   }

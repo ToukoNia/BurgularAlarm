@@ -1,64 +1,43 @@
 clear arduino
-arduino = serialport("COM15",9600)
-configureTerminator(arduino,"CR/LF")
+arduino = serialport("COM15",9600); %sets up serial object
+configureTerminator(arduino,"CR/LF"); %sets the line terminators to the correct type to ensure successful reading
 
 
 while (1) 
-    message=readline(arduino);
+    message=readline(arduino);  %see what state the arduino is in, is neccessary to know when logging in, logging out, and during when armed/disarmed
     if (message=="User Logged in") %need to add something like activating in 30 seconds, and then activate
-        armSystem = input("Press A to arm the system, or L to logout: ","s");
-        writeline(arduino,armSystem);
-    elseif (message=="Admin Logged in")
+        armSystem = input("Press A to arm the system, or L to logout: ","s"); 
+        writeline(arduino,armSystem); %tells the arduino the selected option
+    elseif (message=="Admin Logged in") %Admin pannel
         systemChoice=input("[A]rm the system, [T]est the system, [U]pdate credentials or [L]ogout: ","s");
         writeline(arduino,systemChoice);
         if (systemChoice=="U")
-            systemChoice=input("[A]dd or [R]emove a user: ","s");
-            while(1)
-                if (readline(arduino)=="Add or Remove")
-                    writeline(arduino,systemChoice);
-                    break
-                end
-            end
+            systemChoice=input("[A]dd or [R]emove a user: ","s"); %gets what to do, and writes it to the arduino
+            communicate(arduino,"Add or Remove",systemChoice);
             username=input("Username: ","s");
-
-            while(1)
-              if (readline(arduino)=="Get Username")
-                    writeline(arduino,username);
-                    break
-              end
-            end
+            communicate(arduino,"Get Username",username); %communicates the neccessary information to identify what is being selected
             if systemChoice=="A"
                 systemChoice=input("Type 1 if admin: ","s");
-                while(1)
-                    if (readline(arduino)=="Get Admin")
-                        writeline(arduino,systemChoice);
-                        break
-                    end
-                end
-            else
-                disp(readline(arduino));
+                communicate(arduino,"Get Admin",systemChoice);
             end
+            disp(readline(arduino));    %display success/error message to user for adding/removing, after the arduino has done the computation
         end
-    elseif (message=="Check Login")
+    elseif (message=="Check Login") %calls to see if there is a login
         username=input("Username: ","s");
         password=input("Password: ","s");
-        writeline(arduino,"1");
-        while(1)
-            if (readline(arduino)=="Check Username")
-                writeline(arduino,username);
-                break
-            end
-        end
-        while(1)
-             if (readline(arduino)=="Check Password")
-                writeline(arduino,password);
-                break
-             end
-        end
+        writeline(arduino,"1"); %if there is a login write 1 to the arduino
+        communicate(arduino,"Check Password",username) %then communicate to the arduino the username and password (NOTE: the username step will be changed when i add facial fully)
+        communicate(arduino,"Check Password",password)
     end
 end
 
-
+function communicate(arduino,prompt,info)   %communicates w the arduino in a way that avoids errors
+    while(1)
+        if (readline(arduino)==prompt)
+            writeline(arduino,info);
+            break
+        end
+    end
+end
     
-clear arduino
 

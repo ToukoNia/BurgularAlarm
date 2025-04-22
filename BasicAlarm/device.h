@@ -7,10 +7,11 @@ class Device {
   protected:
     int pinNumber;
     bool status;
-   // char[] name;
+    String name;
   public:
-    void createDevice(int pinNo, bool currentStatus, int type);
+    void createDevice(int pinNo, bool currentStatus, int type, String ID);
     bool getStatus();
+    String getName();
 };
 
 class Sensor: public Device {

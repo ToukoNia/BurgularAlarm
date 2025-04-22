@@ -32,7 +32,7 @@ class SystemController {
     bool raiseAlarm();
     void testSystem();
     int Login();
-    bool manageUsers(int type, String userID);
+    int manageUsers(int type, String userID);
 };
 
 

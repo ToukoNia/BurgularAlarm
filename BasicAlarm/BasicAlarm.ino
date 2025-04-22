@@ -38,13 +38,18 @@ void loop() {
         username=communicator.getSerial("Get Username");
         if (message=="A"){
           message=communicator.getSerial("Get Admin");
-          sys.manageUsers((1+(message=="1")), username);
+          value = sys.manageUsers((1+(message=="1")), username);
+          if (value==1){
+            Serial.print(username); Serial.println(" has been successfully added.");
+          } else {
+            Serial.println("You are at the maximum number of users. Please delete a user to continue.");
+          }
         } else{//put something to print out all users
             value=sys.manageUsers(0,username);
             if (value==1){
               Serial.print(username); Serial.println(" has been successfully deleted.");
             } else if (value==-1){
-              Serial.print(username); Serial.println(" is the last admin, and so cannot be deleted.");
+              Serial.print(username); Serial.println(" is the current user, and so cannot be deleted.");
             } else{
               Serial.print(username); Serial.println(" is not a valid user.");
             }

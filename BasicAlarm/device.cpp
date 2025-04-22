@@ -1,8 +1,9 @@
 #include "device.h"
 
-void Device::createDevice(int pinNo, bool currentStatus, int type){
+void Device::createDevice(int pinNo, bool currentStatus, int type,String ID){
   pinNumber=pinNo;
   status=currentStatus;
+  name=ID;
   if (!type){
     pinMode(pinNumber, OUTPUT);
   } else if (type==1){
@@ -16,16 +17,15 @@ bool Device::getStatus(){
   return status;
 }
 
+String Device::getName(){
+  return name;
+}
 
 bool Sensor::readFromSensor(){
   if (status==1){
     return !digitalRead(pinNumber);
   }
   return digitalRead(pinNumber);
-}
-
-void Sensor::updateStatus(bool update){
-  status=update;
 }
 
 void Lock::lock(){

@@ -12,9 +12,11 @@ class SensorManager {
   private:
     int head=0; int tail=0; int i;
     Sensor sensors[MAX_IO];
+    Sensor fobSensor;
   public:
-    void addSensor(int pinNo, bool logic, int type);
+    bool addSensor(int pinNo, bool logic, int type, String name);
     void removeSensor(int number);
+    void changeFobSensor(int pinNo, bool logic, int type, String name);
     bool checkSensors();
     int getNumber();
 };
@@ -24,7 +26,7 @@ class LockManager{
     int head=0; int tail=0; int i;
     Lock locks[MAX_IO];
   public:
-    void addLock(int pinNo);
+    bool addLock(int pinNo, String name);
     void removeLock(int pinNo);
     int getNumber();
     void unlockAll();

@@ -40,26 +40,23 @@ void AuthenticationManager::resetAttempts(){  //resets the attempt lock on a suc
   attemptNumber=0;
 }
 
-void AuthenticationManager::addUser(String userID, bool admin){ //adds a user
-  users[head] = User();
-  users[head].updateCredentials(userID, admin);  //change to constructors at somepoint
-  head++;
-  if (admin){ //tracks the admin count
-    adminCount++;
+bool AuthenticationManager::addUser(String userID, bool admin){ //adds a user
+  if(head<MAX_USERS){
+    users[head] = User();
+    users[head].updateCredentials(userID, admin);  //change to constructors at somepoint
+    head++;
+    return 1;
   }
+  return 0;
 }
 
 int AuthenticationManager::removeUser(String userID){ //removes a user, and outputs if failed bc last admin or if user cannot be found
   tail = searchUsers(userID);
-  if (tail<0){
-    return 0;
+  if (tail==currentUser){
+    return -1;
   }
-  if (users[tail].adminCheck()){
-    if (adminCount>1){
-      adminCount--;
-    } else{
-      return -1;
-    }
+  else if (tail<0){
+    return 0;
   }
   for (i = tail + 1; i < head; i++) {
     users[tail] = users[i];
