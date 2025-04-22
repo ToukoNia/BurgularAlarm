@@ -4,7 +4,7 @@ configureTerminator(arduino,"CR/LF"); %sets the line terminators to the correct 
 
 
 while (1) 
-    message=readline(arduino);  %see what state the arduino is in, is neccessary to know when logging in, logging out, and during when armed/disarmed
+    message=readline(arduino);  %see what state the arduino is in, is neccessary to know when logging in, logging out, and if armed/disarmed
     if (message=="User Logged in") %need to add something like activating in 30 seconds, and then activate
         armSystem = input("Press A to arm the system, or L to logout: ","s"); 
         writeline(arduino,armSystem); %tells the arduino the selected option
@@ -26,7 +26,7 @@ while (1)
         username=input("Username: ","s");
         password=input("Password: ","s");
         writeline(arduino,"1"); %if there is a login write 1 to the arduino
-        communicate(arduino,"Check Password",username) %then communicate to the arduino the username and password (NOTE: the username step will be changed when i add facial fully)
+        communicate(arduino,"Check Username",username) %then communicate to the arduino the username and password (NOTE: the username step will be changed when i add facial fully)
         communicate(arduino,"Check Password",password)
     end
 end

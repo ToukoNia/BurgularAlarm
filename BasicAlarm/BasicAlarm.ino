@@ -34,26 +34,7 @@ void loop() {
       } else if (message=="T"){
         digitalWrite(4,1);
       } else if (message=="U"){
-        message=communicator.getSerial("Add or Remove");
-        username=communicator.getSerial("Get Username");
-        if (message=="A"){
-          message=communicator.getSerial("Get Admin");
-          value = sys.manageUsers((1+(message=="1")), username);
-          if (value==1){
-            Serial.print(username); Serial.println(" has been successfully added.");
-          } else {
-            Serial.println("You are at the maximum number of users. Please delete a user to continue.");
-          }
-        } else{//put something to print out all users
-            value=sys.manageUsers(0,username);
-            if (value==1){
-              Serial.print(username); Serial.println(" has been successfully deleted.");
-            } else if (value==-1){
-              Serial.print(username); Serial.println(" is the current user, and so cannot be deleted.");
-            } else{
-              Serial.print(username); Serial.println(" is not a valid user.");
-            }
-          }
+        updateUsers();
       }
       else if (message=="L"){
         flag=0;
@@ -62,5 +43,26 @@ void loop() {
   } 
 }
 
-
+void updateUsers(){
+  message=communicator.getSerial("Add or Remove");
+    username=communicator.getSerial("Get Username");
+    if (message=="A"){
+      message=communicator.getSerial("Get Admin");
+      value = sys.manageUsers((1+(message=="1")), username);
+      if (value==1){
+        Serial.print(username); Serial.println(" has been successfully added.");
+      } else {
+        Serial.println("You are at the maximum number of users. Please delete a user to continue.");
+      }
+    } else{//put something to print out all users
+        value=sys.manageUsers(0,username);
+        if (value==1){
+          Serial.print(username); Serial.println(" has been successfully deleted.");
+        } else if (value==-1){
+          Serial.print(username); Serial.println(" is the current user, and so cannot be deleted.");
+        } else{
+          Serial.print(username); Serial.println(" is not a valid user.");
+        }
+      }
+}
 
