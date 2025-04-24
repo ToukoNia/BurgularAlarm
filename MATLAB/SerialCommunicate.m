@@ -38,5 +38,3 @@ function communicate(arduino,prompt,info)   %communicates w the arduino in a way
         end
     end
 end
-    
-

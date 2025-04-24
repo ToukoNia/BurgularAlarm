@@ -7,7 +7,7 @@
 % users, adding new users easily, setting needed accuracy
 
 
-function [M,I] = Predict(n,str,newnet)
+function username = Predict(n,str,newnet)
 
 % Test a new Image
 % use code below with giving path to your new image
@@ -16,7 +16,7 @@ function [M,I] = Predict(n,str,newnet)
 count = zeros(2,1); t=0;
 
 nameofs01 = 'Nia';
-nameofs02 = 'Imogen';
+nameofs02 = 'Mumin';
 % nameofs03 = 'name of subject 3';
 
 %% Capturing faces using capturefacesfromvideo.m for prediction
@@ -34,12 +34,12 @@ for i=1:n  %taking the n images
         img = imresize(img,[227 227]);
     
         % can use [predict,score] = classify(newnet,img) here score says the percentage how confidence it is
-        [predict,scores] = classify(newnet,img) %it will always match an image to a label 
+        [predict,scores] = classify(newnet,img); %it will always match an image to a label 
         t=t+1;
-        if predict=="s01"&max(scores)>0.8
+        if predict=="s01"&max(scores)>0.96
             count(1) = count(1) + 1;
             %fprintf('The face detected is %s \n',nameofs01);
-        elseif predict=="s02"&max(scores)>0.8
+        elseif predict=="s02"&max(scores)>0.96
             count(2) = count(2) + 1;
             %fprintf('The face detected is %s \n',nameofs02);    
         end
@@ -51,12 +51,12 @@ end
 [M,I] = max(count);
 
 if M<t*0.7;
-    fprintf('The face is not recognised \n');
+    username="Failed";
 else
     if I==1
-        fprintf('Confident the face detected is %s \n',nameofs01);
+        username= nameofs01
     elseif  I==2
-        fprintf('Confident the face detected is %s \n',nameofs02);
+        username= nameofs02
     end
 end
 

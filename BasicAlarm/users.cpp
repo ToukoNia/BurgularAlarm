@@ -25,7 +25,7 @@ int AuthenticationManager::searchUsers(String UserID){  //hashmap later?
 }
 
 int AuthenticationManager::authenticate(String userID, String pinAttempt){  //authenticate the user and return if authenticated, with the level of permits
-  if (attemptNumber<maxAttempts&&!(userID=="0")){
+  if ((attemptNumber<maxAttempts)&&(searchUsers(userID)!=-1)){
     if (pin==pinAttempt){
       attemptNumber=0;
       return (1+users[searchUsers(userID)].adminCheck());

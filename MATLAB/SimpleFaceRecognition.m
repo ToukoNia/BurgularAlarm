@@ -10,6 +10,7 @@ function newnet = SimpleFaceRecognition(n)
 % folders
 
 % You can comment this out if you do not need to take photos for training
+
 for i =1:n
     str = ['s0',int2str(i)];
     delete(['photos\',str,'\*.jpg']); %delete current photos from folder
