@@ -13,7 +13,7 @@ void SystemController::armSystem(){
   flag=0;
   timeStamp=millis();
   while (timeStamp+ALARM_DELAY*1000>millis()){  //wait after system is armed until user could have logged in
-    if (Login()==1){
+    if (Login()){
       Locks.unlockAll();
       return;
     } else if (Login()==-1){
@@ -21,7 +21,7 @@ void SystemController::armSystem(){
     }
   } 
   while (!Sensors.checkSensors()&&!flag){ //loops until sensor checked, or login detected, or over login limit
-    if (Login()==1){
+    if (Login()){
         Locks.unlockAll();
         return;
     }
@@ -31,7 +31,7 @@ void SystemController::armSystem(){
   }
   timeStamp=millis();
   while (timeStamp+ALARM_DELAY*1000>millis()&&!flag){ //delay to allow the user to get there in time
-    if (Login()==1){
+    if (Login()){
       Locks.unlockAll();
       return;
     } else if (Login()==-1){

@@ -2,7 +2,7 @@
 % of subjects. Output argument is the NN model (needed for the predict
 % stage). 
 
-function newnet = SimpleFaceRecognition(n)
+function newnet = SimpleFaceRecognition(t,n)
 
 
 %% looping through all subjects and cropping faces if found
@@ -10,17 +10,18 @@ function newnet = SimpleFaceRecognition(n)
 % folders
 
 % You can comment this out if you do not need to take photos for training
-
-for i =1:n
-    str = ['s0',int2str(i)];
-    delete(['photos\',str,'\*.jpg']); %delete current photos from folder
-    capturefacesfromvideo(300,str);
-    delete(['croppedfaces\',str,'\*.jpg']);
-    ds1 = imageDatastore(['photos\',str],'IncludeSubfolders',true,'LabelSource','foldernames');
-    cropandsave(ds1,str,1);
+if (t>0)
+    for i =t:n
+        str = ['s0',int2str(i)];
+        delete(['photos\',str,'\*.jpg']); %delete current photos from folder
+        capturefacesfromvideo(300,str);
+        delete(['croppedfaces\',str,'\*.jpg']);
+        ds1 = imageDatastore(['photos\',str],'IncludeSubfolders',true,'LabelSource','foldernames');
+        cropandsave(ds1,str,1);
+    end
 end
 
-%% Training a NN 
+ %% Training a NN 
  im = imageDatastore('croppedfaces','IncludeSubfolders',true,'LabelSource','foldernames');
  % Resize the images to the input size of the net
  im.ReadFcn = @(loc)imresize(imread(loc),[227,227]);

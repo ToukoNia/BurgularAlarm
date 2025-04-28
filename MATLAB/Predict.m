@@ -6,18 +6,14 @@
 % need to manage updating names to the new
 % users, adding new users easily, setting needed accuracy
 
-
-function username = Predict(n,str,newnet)
+%modifying to work with unknown amount of users
+function userID = Predict(n,str,newnet,numberOfSubjects)
 
 % Test a new Image
 % use code below with giving path to your new image
 
 
-count = zeros(2,1); t=0;
-
-nameofs01 = 'Nia';
-nameofs02 = 'Mumin';
-% nameofs03 = 'name of subject 3';
+count = zeros(numberOfSubjects,1); t=0;
 
 %% Capturing faces using capturefacesfromvideo.m for prediction
 delete(['photos\',str,'\*.jpg']);
@@ -36,27 +32,24 @@ for i=1:n  %taking the n images
         % can use [predict,score] = classify(newnet,img) here score says the percentage how confidence it is
         [predict,scores] = classify(newnet,img); %it will always match an image to a label 
         t=t+1;
-        if predict=="s01"&max(scores)>0.96
-            count(1) = count(1) + 1;
-            %fprintf('The face detected is %s \n',nameofs01);
-        elseif predict=="s02"&max(scores)>0.96
-            count(2) = count(2) + 1;
-            %fprintf('The face detected is %s \n',nameofs02);    
+        for j=1:numberOfSubjects
+            str1 = ['s0',int2str(j)];
+            if predict==str1&&max(scores)>0.96
+                count(j) = count(j) + 1;
+                %fprintf('The face detected is %s \n',nameofs01);
+            end
         end
     catch
         break
     end
+    
 end
 
 [M,I] = max(count);
 
 if M<t*0.7;
-    username="Failed";
+    userID=-1;
 else
-    if I==1
-        username= nameofs01
-    elseif  I==2
-        username= nameofs02
-    end
+    userID=I;
 end
 
