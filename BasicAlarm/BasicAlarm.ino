@@ -54,6 +54,8 @@ void loop() {
         sys.updateUsers();
       } else if (message=="D"){
         sys.updateDevices();
+      } else if (message=="C"){
+        sys.updateCredentials();
       }
       else if (message=="L"){
         flag=0;

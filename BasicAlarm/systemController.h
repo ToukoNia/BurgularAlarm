@@ -35,6 +35,7 @@ class SystemController {
     int manageUsers(int type, String userID);
     void updateDevices();
     void updateUsers();
+    void updateCredentials();
 };
 
 

@@ -26,8 +26,8 @@ int AuthenticationManager::searchUsers(String UserID){  //hashmap later?
 
 int AuthenticationManager::authenticate(String userID, String pinAttempt){  //authenticate the user and return if authenticated, with the level of permits
   currentUser=searchUsers(userID);
-  if ((attemptNumber<maxAttempts)&&(currentUser!=-1)){
-    if (pin==pinAttempt){
+  if ((attemptNumber<maxAttempts)){
+    if (pin==pinAttempt&&(currentUser!=-1)){
       attemptNumber=0;
       return (1+users[currentUser].adminCheck());
     }
@@ -35,10 +35,6 @@ int AuthenticationManager::authenticate(String userID, String pinAttempt){  //au
     return 0;
   }
   return -1;
-}
-
-void AuthenticationManager::resetAttempts(){  //resets the attempt lock on a successful login etc (I cannot remember why I needed this or where, something that might be needed later)
-  attemptNumber=0;
 }
 
 bool AuthenticationManager::addUser(String userID, bool admin){ //adds a user

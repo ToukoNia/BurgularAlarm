@@ -66,6 +66,13 @@ void SystemController::testSystem(){  //test system code will go here
   raiseAlarm();
 }
 
+void SystemController::updateCredentials(){
+  password=communicator.getSerial("New Password");
+  message=communicator.getSerial("Attempt Change");
+  Users.updateMaxAttempts(message.toInt());
+  Users.updatePin(password);
+}
+
 int SystemController::manageUsers(int type, String userID){ //0 denotes remove user, 1/2 refers to add user of admin level 0/1
   if (type){
     return Users.addUser(userID,type-1);
@@ -78,7 +85,13 @@ int SystemController::Login(){  //Login code to facilitate loggin in
   if(communicator.checkSerial("Check Login")){
     name=communicator.getSerial("Check Username");
     password=communicator.getSerial("Check Password");
-    return Users.authenticate(name, password);
+    value=Users.authenticate(name, password);
+    if (value==-1){
+      Serial.println("Locked");  //flag that system should display as locked on MATLAB side
+    } else{
+      Serial.println("Not Locked");
+    }
+    return value;
   }
   return 0;
 }

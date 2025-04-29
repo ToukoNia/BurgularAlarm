@@ -26,6 +26,5 @@ class AuthenticationManager{
     bool addUser(String userID, bool isAdmin);
     int removeUser(String userID);
     void Setup(String newPin,int attempts, String userID);
-    void resetAttempts();
 };
 #endif 
