@@ -40,11 +40,11 @@ while (1)
        
     elseif (message=="Check Login") %calls to see if there is a login
         password=input("Password: ","s");
-        userID=Predict(50,'s01Test',newnet,length(users))
+        userID=Predict(50,'s01Test',newnet,length(users));
         if userID>0
             username=users(userID);
         else 
-            username="Failed";
+            username="Failed Login Attempt";
         end
         writeline(arduino,"1"); %if there is a login write 1 to the arduino
         communicate(arduino,"Check Username",username) %then communicate to the arduino the username and password (NOTE: the username step will be changed when i add facial fully)
@@ -86,4 +86,4 @@ function [newnet,users]=SetupBasicSystem()  %need a way tp add to the arduino to
     end
 
     newnet=SimpleFaceRecognition(1,userCount);
-end
+end 

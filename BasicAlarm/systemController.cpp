@@ -6,13 +6,59 @@ void SystemController::setup(){
   Locks.addLock(3,"Solenoid");  //solenoid
   Alarm.setupAlarm();
   Users.Setup("Cheese",3,"Nia");
+  manageUsers(1,"Mumin");
+}
+
+void SystemController::fullSystem(){
+  if(!skipLogin){
+    login=Login();  //logs in
+  } else{
+    skipLogin=0;
+  }
+  
+  if (login==1){  //if user logged in
+    flag=1;
+    while (flag){
+      message=communicator.getSerial("User Logged in");
+      if (message=="A"){
+        flag=0;
+        login=armSystem();
+        skipLogin=1;
+        
+      } else if (message=="L"){
+        flag=0;
+      }
+    }
+    
+  } else if (login==2){ //if an admin logged in
+    flag=1;
+    while(flag){
+      message=communicator.getSerial("Admin Logged in");
+      if (message=="A"){  //arm the system
+        login=armSystem();
+        skipLogin=1;
+        flag=0;
+      } else if (message=="T"){ //test the system
+        testSystem();
+      } else if (message=="U"){ //update credentials
+        updateUsers();
+      } else if (message=="D"){
+        updateDevices();
+      } else if (message=="C"){
+        updateCredentials();
+      }
+      else if (message=="L"){
+        flag=0;
+      }
+    }
+  } 
 }
 
 int SystemController::armSystem(){
   Locks.lockAll();
   flag=0;
-  timeStamp=millis();
-  while (timeStamp+ALARM_DELAY*1000>millis()){  //wait after system is armed until user could have logged in
+  timeStamp=millis();/*
+  while (timeStamp+ALARM_DELAY*1000>millis()){  //wait after system is armed until user could have logged in, was done on MATLAB side to allow for a smoother countdown and an abort button
     value=Login();
     if (value){
       Locks.unlockAll();
@@ -20,7 +66,7 @@ int SystemController::armSystem(){
     } else if (value==-1){
       flag=1; //might need to be changed lmaoo, but currently will set off the alarm after a bit
     }
-  } 
+  } */
   while (!Sensors.checkSensors()&&!flag){ //loops until sensor checked, or login detected, or over login limit
     value=Login();
     if (value){
@@ -62,8 +108,16 @@ int SystemController::raiseAlarm(){  //simple code that manages maintaining and 
 
 void SystemController::testSystem(){  //test system code will go here
   Locks.lockAll();
+  delay(TEST_LENGTH);
+  Locks.unlockAll();
   timeStamp=millis();
-  raiseAlarm();
+  Alarm.triggerAlarm();
+  timeStamp=millis();
+  while(millis()<timeStamp+TEST_LENGTH*1000){
+    Alarm.maintainAlarm();
+  }
+  Alarm.stopAlarm(); 
+  timeStamp=millis();
 }
 
 void SystemController::updateCredentials(){

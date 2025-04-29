@@ -9,7 +9,7 @@ while (1)
         armSystem = input("Press A to arm the system, or L to logout: ","s"); 
         writeline(arduino,armSystem); %tells the arduino the selected option
     elseif (message=="Admin Logged in") %Admin pannel
-        systemChoice=input("[A]rm the system, [T]est the system, [U]pdate credentials, [C]hange password or [L]ogout: ","s");
+        systemChoice=input("[A]rm the system, [T]est the system, [U]pdate users, update [C]redentials or [L]ogout: ","s");
         writeline(arduino,systemChoice);
         if (systemChoice=="U")
             systemChoice=input("[A]dd or [R]emove a user: ","s"); %gets what to do, and writes it to the arduino
@@ -31,19 +31,20 @@ while (1)
                 end
             end
             disp(readline(arduino));    %display success/error message to user for adding/removing, after the arduino has done the computation
-        elseif systemChoice=="C"
+        elseif systemChoice=="C"    %updates the credentials
             password=input("Enter the new password ","s");
-            attempts=input("How many attempts: ","s");
-            
+            attempts=input("How many attempts: ","s");      %make this 0 if no input
+            communicate(arduino,"New Password",password);   %make this 0 if no password
+            communicate(arduino,"Attempt Change",attempts);
         end
        
     elseif (message=="Check Login") %calls to see if there is a login
         password=input("Password: ","s");
-        userID=Predict(50,'s01Test',newnet,length(users));
+        userID=Predict(50,'s01Test',newnet,length(users))
         if userID>0
             username=users(userID);
         else 
-            username="Failed";
+            username="Failed Login Attempt";
         end
         writeline(arduino,"1"); %if there is a login write 1 to the arduino
         communicate(arduino,"Check Username",username) %then communicate to the arduino the username and password (NOTE: the username step will be changed when i add facial fully)
@@ -86,3 +87,5 @@ function [newnet,users]=SetupBasicSystem()  %need a way tp add to the arduino to
 
     newnet=SimpleFaceRecognition(1,userCount);
 end
+
+function 
