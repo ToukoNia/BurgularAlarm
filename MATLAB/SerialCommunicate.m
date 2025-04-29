@@ -15,9 +15,9 @@ while (1)
             systemChoice=input("[A]dd or [R]emove a user: ","s"); %gets what to do, and writes it to the arduino
             communicate(arduino,"Add or Remove",systemChoice);
             username=input("Username: ","s");
-            users(end+1)=username; %adds the new username to the array
             communicate(arduino,"Get Username",username); %communicates the neccessary information to identify what is being selected
             if systemChoice=="A"
+                users(end+1)=username; %adds the new username to the array
                 userCount=length(users);
                 newnet=SimpleFaceRecognition(userCount,userCount); %adds a new face at the registered value
                 systemChoice=input("Type 1 if admin: ","s");
@@ -67,17 +67,17 @@ function removeUserFromFacialID(userNo,numberOfUsers)   %removes users from the 
    end
 end
 
-function SetupFacialRecognition()  %need a way tp add to the arduino too
+function [newnet,users]=SetupBasicSystem()  %need a way tp add to the arduino too
     users=[];
     userCount=input("How many users? ");
     for i=1:userCount
         users(i)=input("Username: ","s");
     end
-    newnet=SimpleFaceRecognition(1,userCount);
-
     for i=(length(users)+1:12)
        str = ['s0',int2str(i)];
        delete(['photos\',str,'\*.jpg']);
        delete(['croppedfaces\',str,'\*.jpg']);
     end
+
+    newnet=SimpleFaceRecognition(1,userCount);
 end
