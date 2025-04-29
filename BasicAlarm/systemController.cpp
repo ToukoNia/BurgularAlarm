@@ -8,49 +8,52 @@ void SystemController::setup(){
   Users.Setup("Cheese",3,"Nia");
 }
 
-void SystemController::armSystem(){
+int SystemController::armSystem(){
   Locks.lockAll();
   flag=0;
   timeStamp=millis();
   while (timeStamp+ALARM_DELAY*1000>millis()){  //wait after system is armed until user could have logged in
-    if (Login()){
+    value=Login();
+    if (value){
       Locks.unlockAll();
-      return;
-    } else if (Login()==-1){
-      flag=1;
+      return value;
+    } else if (value==-1){
+      flag=1; //might need to be changed lmaoo, but currently will set off the alarm after a bit
     }
   } 
   while (!Sensors.checkSensors()&&!flag){ //loops until sensor checked, or login detected, or over login limit
-    if (Login()){
-        Locks.unlockAll();
-        return;
-    }
-    else if (Login()==-1){
-      flag=1;
+    value=Login();
+    if (value){
+      Locks.unlockAll();
+      return value;
+    } else if (value==-1){
+      flag=1; //basically if too many logins set off alarm
     }
   }
   timeStamp=millis();
-  while (timeStamp+ALARM_DELAY*1000>millis()&&!flag){ //delay to allow the user to get there in time
-    if (Login()){
+  while (timeStamp+ALARM_DELAY*1000>millis()&&!flag){ //delay to allow the user to get there in time, except if the flag is set (too many logins)
+    value=Login();
+    if (value){
       Locks.unlockAll();
-      return;
-    } else if (Login()==-1){
-    flag=1;
+      return value;
+    } else if (value==-1){
+      flag=1;
     }   
   }
-  raiseAlarm();
+  return raiseAlarm();
 }
 
 
-bool SystemController::raiseAlarm(){  //simple code that manages maintaining and creating the alarm (note, might be a better idea to destroy the alarm manager and to fit it here)
+int SystemController::raiseAlarm(){  //simple code that manages maintaining and creating the alarm (note, might be a better idea to destroy the alarm manager and to fit it here)
     Alarm.triggerAlarm();
     timeStamp=millis();
     while(millis()<timeStamp+ALARM_LENGTH*1000){
       Alarm.maintainAlarm();
-      if (Login()){
+      value=Login();
+      if (value){
         Locks.unlockAll();
         Alarm.stopAlarm();
-        return 1;
+        return value;
       }
     }
     Alarm.stopAlarm(); 

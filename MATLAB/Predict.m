@@ -34,7 +34,7 @@ for i=1:n  %taking the n images
         t=t+1;
         for j=1:numberOfSubjects
             str1 = ['s0',int2str(j)];
-            if predict==str1&&max(scores)>0.96
+            if predict==str1&&max(scores)>0.95
                 count(j) = count(j) + 1;
                 %fprintf('The face detected is %s \n',nameofs01);
             end

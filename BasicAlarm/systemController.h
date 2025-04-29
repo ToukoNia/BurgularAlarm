@@ -28,8 +28,8 @@ class SystemController {
     long timeStamp=0; int flag; int value;
   public:
     void setup();
-    void armSystem();
-    bool raiseAlarm();
+    int armSystem();
+    int raiseAlarm();
     void testSystem();
     int Login();
     int manageUsers(int type, String userID);
