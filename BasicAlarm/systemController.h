@@ -7,7 +7,7 @@
 #define ALARM_DELAY 20
 #define ALARM_LENGTH 10
 #define TEST_LENGTH 3
-
+#define LOCKOUT_TIME 30
 class SerialController {
   private:
     String message;
@@ -26,7 +26,7 @@ class SystemController {
     SerialController communicator;
     AuthenticationManager Users;
     String name; String password; String message; String temp; String temp1; String temp2;
-    long timeStamp=0; int flag; int value; int login; bool skipLogin=1;
+    long timeStamp=0; int flag; int value; int login; bool skipLogin=1; 
     int armSystem();
     int raiseAlarm();
     void testSystem();

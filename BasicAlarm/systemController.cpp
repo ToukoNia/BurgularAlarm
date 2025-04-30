@@ -1,8 +1,8 @@
 #include "systemController.h"
 void SystemController::setup(){
-  Sensors.addSensor(2,1,3,"Window");  //window
+  Sensors.addSensor(2,1,2,"Window");  //window
   Sensors.addSensor(4,0,2,"PIR Motion Detector");  //PIR  
-  Sensors.changeFobSensor(4,0,1,"Fob Button");  //button
+  Sensors.changeFobSensor(5,1,1,"Fob Button");  //button
   Locks.addLock(3,"Solenoid");  //solenoid
   Alarm.setupAlarm();
   Users.Setup("Cheese",3,"Nia");
@@ -51,8 +51,15 @@ void SystemController::fullSystem(){
         flag=0;
       }
     }
-  } 
+  } else if (login==-1){  //
+    timeStamp=millis();
+    while(millis()<timeStamp+LOCKOUT_TIME){
+      Serial.println("System Locked");
+    }
+    Users.resetAttempts();
+  }
 }
+
 
 int SystemController::armSystem(){
   Locks.lockAll();
@@ -74,6 +81,8 @@ int SystemController::armSystem(){
       return value;
     } else if (value==-1){
       flag=1; //basically if too many logins set off alarm
+    } if (Sensors.checkFobSensor()){
+      Locks.unlockAll();
     }
   }
   timeStamp=millis();
@@ -84,11 +93,13 @@ int SystemController::armSystem(){
       return value;
     } else if (value==-1){
       flag=1;
+    }
+    if (Sensors.checkFobSensor()){
+      Locks.unlockAll();
     }   
   }
   return raiseAlarm();
 }
-
 
 int SystemController::raiseAlarm(){  //simple code that manages maintaining and creating the alarm (note, might be a better idea to destroy the alarm manager and to fit it here)
     Alarm.triggerAlarm();

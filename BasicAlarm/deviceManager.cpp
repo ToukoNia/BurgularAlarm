@@ -12,7 +12,11 @@ bool SensorManager::addSensor(int pinNo, bool logic, int type, String name) {  /
 
 void SensorManager::changeFobSensor(int pinNo, bool logic, int type, String name) {  //adds fobsensors
     fobSensor = Sensor();
-    sensors[head].createDevice(pinNo, logic, type, name);  //change to constructors at somepoint
+    fobSensor.createDevice(pinNo, logic, type, name);  //change to constructors at somepoint
+}
+
+bool SensorManager::checkFobSensor(){
+  return fobSensor.readFromSensor();
 }
 
 void SensorManager::removeSensor(int number) {
@@ -31,10 +35,19 @@ int SensorManager::getNumber() {
 bool SensorManager::checkSensors() {
   for (i = 0; i < head; i++) {
     if (sensors[i].readFromSensor()) {
+     // Serial.print("Sensor "); Serial.println(sensors[i].getName());
       return 1;
     }
   }
   return 0;
+}
+
+void SensorManager::testSensors() {
+  for (i = 0; i < head; i++) {
+    if (sensors[i].readFromSensor()) {
+      Serial.print("Sensor "); Serial.println(sensors[i].getName());
+    }
+  }
 }
 
 bool LockManager::addLock(int pinNo, String name) {

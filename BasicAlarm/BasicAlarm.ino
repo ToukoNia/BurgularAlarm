@@ -15,7 +15,6 @@ void setup() {
 }
 
 void loop() {
-  //basic TUI, needs to have the facial recognition implemented and add the ability to change the number of attempts, pin, sensors, locks etc
   sys.fullSystem();
 }
 

@@ -1,5 +1,5 @@
 clear arduino
-arduino = serialport("COM16",9600); %sets up serial object
+arduino = serialport("COM15",9600); %sets up serial object
 configureTerminator(arduino,"CR/LF"); %sets the line terminators to the correct type to ensure successful reading
 users=["Nia","Mumin"];
 %newnet=SimpleFaceRecognition(1,2); Sets up the network

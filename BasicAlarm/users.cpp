@@ -77,3 +77,6 @@ void AuthenticationManager::Setup(String newPin,int attempts, String userID){
   updatePin(newPin);
 }
 
+void AuthenticationManager::resetAttempts(){
+  attemptNumber=0;
+}
