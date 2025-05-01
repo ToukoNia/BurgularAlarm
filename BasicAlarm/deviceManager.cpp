@@ -42,6 +42,23 @@ bool SensorManager::checkSensors() {
   return 0;
 }
 
+void SensorManager::displaySensorList(){  //these two output the list of names of the sensors and locks, with a start message and an end message
+  Serial.println("Sensor List Start");
+  for (i = 0; i < head; i++) {
+      Serial.println(sensors[i].getName());
+  }
+  Serial.println("Sensor List End");
+}
+
+
+void LockManager::displayLockList(){
+  Serial.println("Lock List Start");
+  for (i = 0; i < head; i++) {
+      Serial.println(locks[i].getName());
+  }
+  Serial.println("Lock List End");
+}
+
 void SensorManager::testSensors() {
   for (i = 0; i < head; i++) {
     if (sensors[i].readFromSensor()) {

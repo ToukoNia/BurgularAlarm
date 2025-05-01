@@ -7,6 +7,7 @@ void SystemController::setup(){
   Alarm.setupAlarm();
   Users.Setup("Cheese",3,"Nia");
   manageUsers(1,"Mumin");
+  manageUsers(1,"Callum");
 }
 
 void SystemController::fullSystem(){
@@ -43,7 +44,11 @@ void SystemController::fullSystem(){
       } else if (message=="U"){ //update credentials
         updateUsers();
       } else if (message=="D"){
-        updateDevices();
+        if (updateDevices()){
+          Serial.println("Operation Successful");
+        } else {
+          Serial.println("Problem Occurred")
+        }
       } else if (message=="C"){
         updateCredentials();
       }
@@ -202,10 +207,12 @@ void SystemController::updateDevices(){ //might lowkey wanna switch this to be w
     //code to printout all of the desired or smthing (note: has to be in the if section or after it)
     message=communicator.getSerial("Sensor or Lock");  //gets the selected options from matlab
     if (message=="S"){
+      Sensors.displaySensorList();
       temp=communicator.getSerial("Sensor Number"); //gets the sensor number in teh array and removes it
       Sensors.removeSensor(temp.toInt());
       return 1;
     }
+    Locks.displayLockList();
     temp=communicator.getSerial("Lock Number"); //same with locks
     Locks.removeLock(temp.toInt());
     return 1;

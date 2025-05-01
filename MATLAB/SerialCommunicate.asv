@@ -1,7 +1,7 @@
 clear arduino
-arduino = serialport("COM16",9600); %sets up serial object
+arduino = serialport("COM15",9600); %sets up serial object
 configureTerminator(arduino,"CR/LF"); %sets the line terminators to the correct type to ensure successful reading
-users=["Nia","Mumin"];
+users=["Nia","Mumin","Callum"];
 %newnet=SimpleFaceRecognition(1,2); Sets up the network
 while (1) 
     message=readline(arduino);  %see what state the arduino is in, is neccessary to know when logging in, logging out, and if armed/disarmed
@@ -40,7 +40,7 @@ while (1)
        
     elseif (message=="Check Login") %calls to see if there is a login
         password=input("Password: ","s");
-        userID=Predict(50,'s01Test',newnet,length(users))
+        userID=Predict(50,'s01Test',newnet,length(users));
         if userID>0
             username=users(userID);
         else 
@@ -86,6 +86,17 @@ function [newnet,users]=SetupBasicSystem()  %need a way tp add to the arduino to
     end
 
     newnet=SimpleFaceRecognition(1,userCount);
-end
+end 
 
-function 
+
+%before this set up an if statement reading in a line to check if it
+%matches the start prompt, if so run this function to get all values
+function array=readUntilStop(endMessage)
+    array = []
+    message=readline(arduino);
+    while message~=endMessage
+        array(end+1)=message;
+        message=readline(arduino);
+        
+    end
+end
