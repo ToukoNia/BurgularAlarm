@@ -1,8 +1,15 @@
 clear arduino
 arduino = serialport("COM15",9600); %sets up serial object
 configureTerminator(arduino,"CR/LF"); %sets the line terminators to the correct type to ensure successful reading
-users=["Nia","Mumin","Callum"];
+users=["Nia","Mumin","Callum","David","Aly"];
 %newnet=SimpleFaceRecognition(1,2); Sets up the network
+systemChoice = input("Do you want to load the system or create a new system");
+filename = 'arduino_data.txt';
+fid = fopen(filename, 'a');
+if fid == -1
+    error('Failed to open file for writing.');
+end
+
 while (1) 
     message=readline(arduino);  %see what state the arduino is in, is neccessary to know when logging in, logging out, and if armed/disarmed
     if (message=="User Logged in") %need to add something like activating in 30 seconds, and then activate
@@ -36,10 +43,14 @@ while (1)
             attempts=input("How many attempts: ","s");      %make this 0 if no input
             communicate(arduino,"New Password",password);   %make this 0 if no password
             communicate(arduino,"Attempt Change",attempts);
-        elseif systemChoice=="D"
-            
+        elseif systemChoice=="S"
+             writeline(arduino,"SAVING");
+             save(newnet);
+             saveInformation("User Start", "User End","users.txt");
+             saveInformation("Credentials Start", "Credentials End","credentials.txt");
+             saveInformation("Sesnors Start", "Sensors End","sensors.txt");
+             saveInformation("Locks Start", "Locks End","locks.txt");
         end
-       
     elseif (message=="Check Login") %calls to see if there is a login
         password=input("Password: ","s");
         userID=Predict(50,'s01Test',newnet,length(users));
@@ -94,11 +105,27 @@ end
 %before this set up an if statement reading in a line to check if it
 %matches the start prompt, if so run this function to get all values
 function array=readUntilStop(endMessage)
-    array = []
+    array = string([]);
     message=readline(arduino);
     while message~=endMessage
         array(end+1)=message;
         message=readline(arduino);
-        
     end
 end
+
+function saveInformation(arduino,prompt,endPrompt,filename)
+    while (readline(arduino)~=prompt)
+    end
+    arr=readUntilStop(arduino,endPrompt);
+    fid=fopen(filename,"w");
+    saveToFile(fid,arr);
+    fclose(fid);
+end
+
+function saveToFile(fid,array)
+    for i=1:length(array)
+        fprintf(fid, '%s', array(i));
+    end
+end
+
+

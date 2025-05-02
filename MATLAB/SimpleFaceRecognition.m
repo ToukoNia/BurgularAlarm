@@ -34,7 +34,7 @@ end
  ly(25) = cl; 
  % options for training the net if your newnet performance is low decrease
  % the learning_rate
- learning_rate = 0.00001;
+ learning_rate = 0.000001;
  opts = trainingOptions("rmsprop","InitialLearnRate",learning_rate,'MaxEpochs',5,'MiniBatchSize',64,'Plots','training-progress');
  [newnet,info] = trainNetwork(Train, ly, opts);
  
