@@ -47,7 +47,7 @@ void SystemController::fullSystem(){
         if (updateDevices()){
           Serial.println("Operation Successful");
         } else {
-          Serial.println("Problem Occurred")
+          Serial.println("Problem Occurred");
         }
       } else if (message=="C"){
         updateCredentials();
@@ -55,10 +55,18 @@ void SystemController::fullSystem(){
       else if (message=="L"){
         flag=0;
       }
+      else if (message=="SE"){
+        //SEND SENSOR DATA
+        Sensors.displaySensorList();
+      }
+      else if (message=="LO"){
+        //SEND LOCK DATA
+        Locks.displayLockList();
+      }
     }
   } else if (login==-1){  //
     timeStamp=millis();
-    while(millis()<timeStamp+LOCKOUT_TIME){
+    while(millis()<timeStamp+LOCKOUT_TIME*1000){
       Serial.println("System Locked");
     }
     Users.resetAttempts();
@@ -189,7 +197,7 @@ void SystemController::updateUsers(){
   }
 }
 
-void SystemController::updateDevices(){ //might lowkey wanna switch this to be without so many temps lmao
+bool SystemController::updateDevices(){ //might lowkey wanna switch this to be without so many temps lmao
   message=communicator.getSerial("Add or remove");
   if (message=="A"){
     message=communicator.getSerial("Sensor or Lock");  //gets the selected options from matlab
@@ -207,12 +215,10 @@ void SystemController::updateDevices(){ //might lowkey wanna switch this to be w
     //code to printout all of the desired or smthing (note: has to be in the if section or after it)
     message=communicator.getSerial("Sensor or Lock");  //gets the selected options from matlab
     if (message=="S"){
-      Sensors.displaySensorList();
       temp=communicator.getSerial("Sensor Number"); //gets the sensor number in teh array and removes it
       Sensors.removeSensor(temp.toInt());
       return 1;
     }
-    Locks.displayLockList();
     temp=communicator.getSerial("Lock Number"); //same with locks
     Locks.removeLock(temp.toInt());
     return 1;

@@ -32,7 +32,7 @@ class SystemController {
     void testSystem();
     int Login();
     int manageUsers(int type, String userID);
-    void updateDevices();
+    bool updateDevices();
     void updateUsers();
     void updateCredentials();
   public:
