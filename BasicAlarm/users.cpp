@@ -26,15 +26,15 @@ int AuthenticationManager::searchUsers(String UserID){  //hashmap later?
 
 int AuthenticationManager::authenticate(String userID, String pinAttempt){  //authenticate the user and return if authenticated, with the level of permits
   currentUser=searchUsers(userID);
-  if ((attemptNumber<maxAttempts)){
-    if (pin==pinAttempt&&(currentUser!=-1)){
-      attemptNumber=0;
-      return (1+users[currentUser].adminCheck());
-    }
-    attemptNumber++;
-    return 0;
+  if (pin==pinAttempt&&(currentUser!=-1)){
+    attemptNumber=0;
+    return (1+users[currentUser].adminCheck());
   }
-  return -1;
+  attemptNumber++;
+  if (attemptNumber==maxAttempts){
+    return -1;
+  }
+  return 0;
 }
 
 bool AuthenticationManager::addUser(String userID, bool admin){ //adds a user
