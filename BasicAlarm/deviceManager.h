@@ -19,7 +19,7 @@ class SensorManager {
     void changeFobSensor(int pinNo, bool logic, int type, String name);
     bool checkSensors();
     int getNumber();
-    void displaySensorList();
+    void displaySensorList(bool infoLevel);
     bool checkFobSensor();
     void testSensors();
 };
@@ -31,7 +31,7 @@ class LockManager{
   public:
     bool addLock(int pinNo, String name);
     void removeLock(int pinNo);
-    void displayLockList();
+    void displayLockList(bool infoLevel);
     int getNumber();
     void unlockAll();
     void lockAll();

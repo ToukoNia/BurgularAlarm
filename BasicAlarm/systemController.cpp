@@ -8,6 +8,8 @@ void SystemController::setup(){
   Users.Setup("Cheese",3,"Nia");
   manageUsers(1,"Mumin");
   manageUsers(1,"Callum");
+  manageUsers(1,"David");
+  manageUsers(1,"Aly");
 }
 
 void SystemController::fullSystem(){
@@ -57,11 +59,15 @@ void SystemController::fullSystem(){
       }
       else if (message=="SE"){
         //SEND SENSOR DATA
-        Sensors.displaySensorList();
+        Sensors.displaySensorList(0);
       }
       else if (message=="LO"){
         //SEND LOCK DATA
-        Locks.displayLockList();
+        Locks.displayLockList(0);
+      } else if (message=="S"){
+        Users.printOut();
+        Sensors.displaySensorList(1);
+        Locks.displayLockList(1);
       }
     }
   } else if (login==-1){  //

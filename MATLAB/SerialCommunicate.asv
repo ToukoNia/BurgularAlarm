@@ -1,15 +1,16 @@
 clear arduino
 arduino = serialport("COM15",9600); %sets up serial object
 configureTerminator(arduino,"CR/LF"); %sets the line terminators to the correct type to ensure successful reading
-users=["Nia","Mumin","Callum","David"];
+users=["Nia","Mumin","Callum","David","Aly"];
 %newnet=SimpleFaceRecognition(1,2); Sets up the network
+%{
 systemChoice = input("Do you want to load the system or create a new system");
 filename = 'arduino_data.txt';
-fid = fopen(filename, 'a');
+fid = fopen(filename, ['r']);
 if fid == -1
-    error('Failed to open file for writing.');
+    error('Failed to open file for reading.');
 end
-
+%}
 while (1) 
     message=readline(arduino);  %see what state the arduino is in, is neccessary to know when logging in, logging out, and if armed/disarmed
     if (message=="User Logged in") %need to add something like activating in 30 seconds, and then activate
@@ -43,7 +44,13 @@ while (1)
             attempts=input("How many attempts: ","s");      %make this 0 if no input
             communicate(arduino,"New Password",password);   %make this 0 if no password
             communicate(arduino,"Attempt Change",attempts);
-       
+        elseif systemChoice=="S"
+             %save(newnet);
+             saveInformation("Credentials Start", "Credentials End","credentials.txt");
+             saveInformation("User List Start", "User List End","users.txt");
+             saveInformation("Sensor List Start", "Sensor List End","sensors.txt");
+             saveInformation("Lock List Start", "Lock List End","locks.txt");
+        end
     elseif (message=="Check Login") %calls to see if there is a login
         password=input("Password: ","s");
         userID=Predict(50,'s01Test',newnet,length(users));
@@ -57,32 +64,7 @@ while (1)
         communicate(arduino,"Check Password",password)
     end
 end
-function saveSystem(arduino)
-   writeline(arduino,"SAVING");
-    saveInformation("User Start", "User End","users.txt");
-    saveInformation("Credentials Start", "Credentials End","credentials.txt");
-    saveInformation("Sesnors Start", "Sensors End","sensors.txt");
-    saveInformation("Locks Start", "Locks End","locks.txt");
-    if (readline(arduino)=="User Start")
-       arr=readUntilStop(arduino,"User End");
-       fid=fopen("users.txt","w");
-       save_information(fid,arr);
-       fclose(fid);
-   end
-   if (readline(arduino)=="Sensor Start")
-       arr=readUntilStop(arduino,"Sensor End");
-       fid=fopen("sensors.txt","w");
-       save_information(fid,arr);
-       fclose(fid);
-   end
-   if (readline(arduino)=="Locks Start")
-       arr=readUntilStop(arduino,"Locks End");
-       fid=fopen("locks.txt","w");
-       save_information(fid,arr);
-       fclose(fid);
-   end
 
-end
 function communicate(arduino,prompt,info)   %communicates w the arduino in a way that avoids errors
     while(1)
         if (readline(arduino)==prompt)
@@ -131,18 +113,25 @@ function array=readUntilStop(endMessage)
     end
 end
 
-function saveInformation(prompt,endPrompt,filename)
-    if (readline(arduino)==prompt)
-        arr=readUntilStop(arduino,endPrompt);
-       fid=fopen(filename,"w");
-       saveToFile(fid,arr);
-       fclose(fid);
+function saveInformation(arduino,prompt,endPrompt,filename)
+    while(1)
+        if (readline(arduino)==prompt)
+            arr=readUntilStop(arduino,endPrompt);
+            fid=fopen(filename,"w");
+            if fid == -1
+                error('Failed to open file for writing.');
+            end
+            saveToFile(fid,arr);
+            fclose(fid);
+            break
+        end
     end
+   
 end
 
 function saveToFile(fid,array)
     for i=1:length(array)
-        fprintf(fid, '%s', array(i));
+        fprintf(fid, '%s\n', array(i));
     end
 end
 

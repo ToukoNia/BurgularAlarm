@@ -42,19 +42,29 @@ bool SensorManager::checkSensors() {
   return 0;
 }
 
-void SensorManager::displaySensorList(){  //these two output the list of names of the sensors and locks, with a start message and an end message
+void SensorManager::displaySensorList(bool infoLevel){  //these two output the list of names of the sensors and locks, with a start message and an end message
   Serial.println("Sensor List Start");
+  while (!(Serial.available()>0));
   for (i = 0; i < head; i++) {
-      Serial.println(sensors[i].getName());
+      Serial.print(sensors[i].getName());
+      if (infoLevel){ 
+        Serial.print(","); sensors[i].printOut();
+      }
+      Serial.println();
   }
   Serial.println("Sensor List End");
 }
 
 
-void LockManager::displayLockList(){
+void LockManager::displayLockList(bool infoLevel){
   Serial.println("Lock List Start");
+  while (!(Serial.available()>0));
   for (i = 0; i < head; i++) {
-      Serial.println(locks[i].getName());
+      Serial.print(locks[i].getName());
+      if (infoLevel){ 
+        Serial.print(","); locks[i].printOut();
+      }
+      Serial.println();
   }
   Serial.println("Lock List End");
 }

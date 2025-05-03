@@ -3,13 +3,14 @@ arduino = serialport("COM15",9600); %sets up serial object
 configureTerminator(arduino,"CR/LF"); %sets the line terminators to the correct type to ensure successful reading
 users=["Nia","Mumin","Callum","David","Aly"];
 %newnet=SimpleFaceRecognition(1,2); Sets up the network
+%{
 systemChoice = input("Do you want to load the system or create a new system");
 filename = 'arduino_data.txt';
-fid = fopen(filename, 'a');
+fid = fopen(filename, ['r']);
 if fid == -1
-    error('Failed to open file for writing.');
+    error('Failed to open file for reading.');
 end
-
+%}
 while (1) 
     message=readline(arduino);  %see what state the arduino is in, is neccessary to know when logging in, logging out, and if armed/disarmed
     if (message=="User Logged in") %need to add something like activating in 30 seconds, and then activate
@@ -44,12 +45,11 @@ while (1)
             communicate(arduino,"New Password",password);   %make this 0 if no password
             communicate(arduino,"Attempt Change",attempts);
         elseif systemChoice=="S"
-             writeline(arduino,"SAVING");
-             save(newnet);
-             saveInformation("User Start", "User End","users.txt");
-             saveInformation("Credentials Start", "Credentials End","credentials.txt");
-             saveInformation("Sesnors Start", "Sensors End","sensors.txt");
-             saveInformation("Locks Start", "Locks End","locks.txt");
+             %save(newnet);
+             saveInformation(arduino,"Credentials Start", "Credentials End","credentials.txt");
+             saveInformation(arduino,"User List Start", "User List End","users.txt");
+             saveInformation(arduino,"Sensor List Start", "Sensor List End","sensors.txt");
+             saveInformation(arduino,"Lock List Start", "Lock List End","locks.txt");
         end
     elseif (message=="Check Login") %calls to see if there is a login
         password=input("Password: ","s");
@@ -59,6 +59,7 @@ while (1)
         else 
             username="Failed Login Attempt";
         end
+        username = "Nia" %REMOVE LATER
         writeline(arduino,"1"); %if there is a login write 1 to the arduino
         communicate(arduino,"Check Username",username) %then communicate to the arduino the username and password (NOTE: the username step will be changed when i add facial fully)
         communicate(arduino,"Check Password",password)
@@ -104,7 +105,7 @@ end
 
 %before this set up an if statement reading in a line to check if it
 %matches the start prompt, if so run this function to get all values
-function array=readUntilStop(endMessage)
+function array=readUntilStop(arduino,endMessage)
     array = string([]);
     message=readline(arduino);
     while message~=endMessage
@@ -116,15 +117,19 @@ end
 function saveInformation(arduino,prompt,endPrompt,filename)
     while (readline(arduino)~=prompt)
     end
+    writeline(arduino,"1");
     arr=readUntilStop(arduino,endPrompt);
     fid=fopen(filename,"w");
+    if fid == -1
+        error('Failed to open file for writing.');
+    end
     saveToFile(fid,arr);
     fclose(fid);
 end
 
 function saveToFile(fid,array)
     for i=1:length(array)
-        fprintf(fid, '%s', array(i));
+        fprintf(fid, '%s\n', array(i));
     end
 end
 

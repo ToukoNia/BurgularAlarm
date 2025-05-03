@@ -1,0 +1,2 @@
+Window,2,1,2
+PIR Motion Detector,4,0,2

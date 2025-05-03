@@ -8,16 +8,13 @@ bool User::adminCheck(){  //returns if user is admin
   return isAdmin;
 }
 
-bool User::checkName(String ID){  //allows us to check if a user is the user we are looking for
-  if (ID==userID){
-    return 1;
-  }
-  return 0;
+String User::getName(){
+  return userID;
 }
 
 int AuthenticationManager::searchUsers(String UserID){  //hashmap later?
   for (i=0; i < head; i++) {  //searches the users to find the index given a set user ID
-    if (users[i].checkName(UserID)){
+    if (users[i].getName()==UserID){
       return i;
     }
   }
@@ -79,4 +76,18 @@ void AuthenticationManager::Setup(String newPin,int attempts, String userID){
 
 void AuthenticationManager::resetAttempts(){
   attemptNumber=0;
+}
+
+void AuthenticationManager::printOut(){
+  Serial.println("Credentials Start");
+  while (!(Serial.available()>0));
+  Serial.println(pin);
+  Serial.println(maxAttempts);
+  Serial.println("Credentials End");
+  Serial.println("User List Start");
+  while (!(Serial.available()>0));
+  for (i=0;i<head;i++){
+    Serial.println(users[i].getName());
+  }
+  Serial.println("User List End");
 }
