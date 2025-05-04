@@ -159,13 +159,12 @@ end
 
 function SendFile(arduino, FileName, EndPrompt)
     FileID = fopen(FileName,'r');
-    lines = string([])
-    lines = fgetl(FileID)
+
+    line = fgetl(FileID)
     while ischar(line)
         writeline(arduino,string(line));
         line = fgetl(FileID)
     end
-    fclose(FileID);
     writeline(arduino,EndPrompt);
 end
 
