@@ -9,7 +9,6 @@ bool SensorManager::addSensor(int pinNo, bool logic, int type, String name) {  /
   }
   return 0;
 }
-
 void SensorManager::changeFobSensor(int pinNo, bool logic, int type, String name) {  //adds fobsensors
     fobSensor = Sensor();
     fobSensor.createDevice(pinNo, logic, type, name);  //change to constructors at somepoint
@@ -42,6 +41,7 @@ bool SensorManager::checkSensors() {
   return 0;
 }
 
+
 void SensorManager::displaySensorList(bool infoLevel){  //these two output the list of names of the sensors and locks, with a start message and an end message
   Serial.println("Sensor List Start");
   while (!(Serial.available()>0));
@@ -72,7 +72,9 @@ void LockManager::displayLockList(bool infoLevel){
 void SensorManager::testSensors() {
   for (i = 0; i < head; i++) {
     if (sensors[i].readFromSensor()) {
-      Serial.print("Sensor "); Serial.println(sensors[i].getName());
+      Serial.print("Sensor "); Serial.print(sensors[i].getName());  Serial.println(" Triggered");
+    } else{
+      Serial.println("No sensor has been triggered");
     }
   }
 }

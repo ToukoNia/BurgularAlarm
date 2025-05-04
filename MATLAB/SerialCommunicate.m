@@ -11,6 +11,29 @@ if fid == -1
     error('Failed to open file for reading.');
 end
 %}
+
+FileID = fopen('credentials.txt','r');
+password = fgetl(FileID);
+attempts = fgetl(FileID);
+fclose(FileID);
+
+communicate(arduino,"Password",password);
+communicate(arduino,"Attempts",attempts);
+
+SendFile(arduino, 'users.txt', "Users End");
+
+SendFile(arduino, 'sensors.txt', "Sensors End");
+
+SendFile(arduino, 'locks.txt', "Locks End");
+
+message=readline(arduino);
+while (message~="Users End")
+        disp(message);
+
+    message=readline(arduino);
+end
+while(1)
+end
 while (1) 
     message=readline(arduino);  %see what state the arduino is in, is neccessary to know when logging in, logging out, and if armed/disarmed
     if (message=="User Logged in") %need to add something like activating in 30 seconds, and then activate
@@ -103,6 +126,7 @@ function [newnet,users]=SetupBasicSystem()  %need a way tp add to the arduino to
 end 
 
 
+
 %before this set up an if statement reading in a line to check if it
 %matches the start prompt, if so run this function to get all values
 function array=readUntilStop(arduino,endMessage)
@@ -133,4 +157,15 @@ function saveToFile(fid,array)
     end
 end
 
+function SendFile(arduino, FileName, EndPrompt)
+    FileID = fopen(FileName,'r');
+    lines = string([])
+    lines = fgetl(FileID)
+    while ischar(line)
+        writeline(arduino,string(line));
+        line = fgetl(FileID)
+    end
+    fclose(FileID);
+    writeline(arduino,EndPrompt);
+end
 

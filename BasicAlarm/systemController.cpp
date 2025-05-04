@@ -6,10 +6,7 @@ void SystemController::setup(){
   Locks.addLock(3,"Solenoid");  //solenoid
   Alarm.setupAlarm();
   Users.Setup("Cheese",3,"Nia");
-  manageUsers(1,"Mumin");
-  manageUsers(1,"Callum");
-  manageUsers(1,"David");
-  manageUsers(1,"Aly");
+ 
 }
 
 void SystemController::fullSystem(){
@@ -83,19 +80,10 @@ void SystemController::fullSystem(){
 int SystemController::armSystem(){
   Locks.lockAll();
   flag=0;
-  timeStamp=millis();/*
-  while (timeStamp+ALARM_DELAY*1000>millis()){  //wait after system is armed until user could have logged in, was done on MATLAB side to allow for a smoother countdown and an abort button
-    value=Login();
-    if (value){
-      Locks.unlockAll();
-      return value;
-    } else if (value==-1){
-      flag=1; //might need to be changed lmaoo, but currently will set off the alarm after a bit
-    }
-  } */
+  timeStamp=millis();
   while (!Sensors.checkSensors()&&!flag){ //loops until sensor checked, or login detected, or over login limit
     value=Login();
-    if (value){
+    if (value>0){
       Locks.unlockAll();
       return value;
     } else if (value==-1){
@@ -107,7 +95,7 @@ int SystemController::armSystem(){
   timeStamp=millis();
   while (timeStamp+ALARM_DELAY*1000>millis()&&!flag){ //delay to allow the user to get there in time, except if the flag is set (too many logins)
     value=Login();
-    if (value){
+    if (value>0){
       Locks.unlockAll();
       return value;
     } else if (value==-1){
@@ -117,8 +105,19 @@ int SystemController::armSystem(){
       Locks.unlockAll();
     }   
   }
-  return raiseAlarm();
+  value=raiseAlarm();
+  if (value>0){
+    Locks.unlockAll();
+    return value;
+  } else if (value==-1){
+    timeStamp=millis();
+    while(millis()<timeStamp+LOCKOUT_TIME*1000){
+      Serial.println("System Locked");
+    }
+    Users.resetAttempts();
+  }
 }
+
 
 int SystemController::raiseAlarm(){  //simple code that manages maintaining and creating the alarm (note, might be a better idea to destroy the alarm manager and to fit it here)
     Alarm.triggerAlarm();
@@ -126,7 +125,7 @@ int SystemController::raiseAlarm(){  //simple code that manages maintaining and 
     while(millis()<timeStamp+ALARM_LENGTH*1000){
       Alarm.maintainAlarm();
       value=Login();
-      if (value){
+      if (value==1){
         Locks.unlockAll();
         Alarm.stopAlarm();
         return value;
@@ -136,11 +135,51 @@ int SystemController::raiseAlarm(){  //simple code that manages maintaining and 
     return 0;
 }
 
+void SystemController::loadSystem(){
+  
+  message=communicator.getSerial("Password");
+  value=communicator.getSerial("Attempts").toInt();
+  Users.updateMaxAttempts(value);
+  Users.updatePin(message);
+
+  message=communicator.getArrayValues();
+  while(message!="Users End"){
+    logic=bool(communicator.getArrayValues().toInt());
+    Users.addUser(message, logic);
+    message=communicator.getArrayValues();
+  }
+
+  message=communicator.getArrayValues();
+  while(message!="Sensors End"){
+    value=communicator.getArrayValues().toInt();
+    logic=bool(communicator.getArrayValues().toInt());
+    flag=communicator.getArrayValues().toInt();
+    Sensors.addSensor(value, logic, flag, message);
+    message=communicator.getArrayValues();
+  }
+
+  message=communicator.getArrayValues();
+  while(message!="Locks End"){
+    value=communicator.getArrayValues().toInt();  
+    Locks.addLock(value, message);
+    message=communicator.getArrayValues();
+  }
+
+  Sensors.displaySensorList(1);
+  Locks.displayLockList(1);
+  Users.printOut();
+  delay(10000);
+}
+
+
+
 void SystemController::testSystem(){  //test system code will go here
+  Serial.println("Testing the locks");
   Locks.lockAll();
-  delay(TEST_LENGTH);
+  delay(TEST_LENGTH*1000);
   Locks.unlockAll();
   timeStamp=millis();
+  Serial.println("Testing the Alarm");
   Alarm.triggerAlarm();
   timeStamp=millis();
   while(millis()<timeStamp+TEST_LENGTH*1000){
@@ -148,6 +187,12 @@ void SystemController::testSystem(){  //test system code will go here
   }
   Alarm.stopAlarm(); 
   timeStamp=millis();
+    Serial.println("Testing the Sensors, trigger them to see on screen");
+  delay(500);
+  while(millis()<timeStamp+2*TEST_LENGTH*1000){
+    Sensors.testSensors();
+  }
+  Serial.println("Test Complete");
 }
 
 void SystemController::updateCredentials(){
@@ -156,14 +201,8 @@ void SystemController::updateCredentials(){
   Users.updateMaxAttempts(message.toInt());
   Users.updatePin(password);
 }
+//DELETE THIS
 
-int SystemController::manageUsers(int type, String userID){ //0 denotes remove user, 1/2 refers to add user of admin level 0/1
-  if (type){
-    return Users.addUser(userID,type-1);
-  } else{
-    return Users.removeUser(userID);
-  }
-}
 
 int SystemController::Login(){  //Login code to facilitate loggin in
   if(communicator.checkSerial("Check Login")){
@@ -185,14 +224,14 @@ void SystemController::updateUsers(){
   name=communicator.getSerial("Get Username");
   if (message=="A"){
     message=communicator.getSerial("Get Admin");  //gets if its an admin signing in
-    value = manageUsers((1+(message=="1")), name);  //add a new user w the permissions of the above message
+    value = Users.addUser(name,(message=="1"));  //add a new user w the permissions of the above message
     if (value==1){  //error/success messages
       Serial.print(name); Serial.println(" has been successfully added.");
     } else {
       Serial.println("You are at the maximum number of users. Please delete a user before adding a new one.");
     }
   } else{//put something to print out all users
-    value=manageUsers(0,name);  //delete the user
+    value=Users.removeUser(name);  //delete the user
     if (value==1){  //error messages
       Serial.print(name); Serial.println(" has been successfully deleted.");
     } else if (value==-1){
@@ -245,7 +284,14 @@ bool SerialController::checkSerial(String prompt){  //checks the serial bus to s
 String SerialController::getSerial(String prompt){  //gets the serial by prompting with the above prompt and then manages it
   Serial.println(prompt);
   while (!(Serial.available()>0));  //waits for a response (NOTE: this is only called when the system knows for sure its getting a response)
-  message=Serial.readStringUntil("\n");
+  message=Serial.readStringUntil('\n');
+  message.trim();
+  return message;
+}
+
+String SerialController::getArrayValues(){
+  while (!(Serial.available()>0));  //waits for a response (NOTE: this is only called when the system knows for sure its getting a response)
+  String message=Serial.readStringUntil(',');
   message.trim();
   return message;
 }
