@@ -4,6 +4,7 @@ void Device::createDevice(int pinNo, bool currentStatus, int type,String ID){
   pinNumber=pinNo;
   status=currentStatus;
   name=ID;
+  pinmode=type;
   if (!type){
     pinMode(pinNumber, OUTPUT);
   } else if (type==1){
@@ -13,19 +14,26 @@ void Device::createDevice(int pinNo, bool currentStatus, int type,String ID){
   }
 }
 
-bool Device::getStatus(){
-  return status;
-}
 
 String Device::getName(){
   return name;
 }
+
+void Device::printOut(){
+  Serial.print(String(pinNumber));//+","+pinstatus","+pinmode);
+}
+
 
 bool Sensor::readFromSensor(){
   if (status==1){
     return !digitalRead(pinNumber);
   }
   return digitalRead(pinNumber);
+}
+
+void Sensor::printOut(){
+  Device::printOut();
+  Serial.print(","+String(status)+","+String(pinmode));
 }
 
 void Lock::lock(){

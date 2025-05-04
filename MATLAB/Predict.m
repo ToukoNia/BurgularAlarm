@@ -30,11 +30,11 @@ for i=1:n  %taking the n images
         img = imresize(img,[227 227]);
     
         % can use [predict,score] = classify(newnet,img) here score says the percentage how confidence it is
-        [predict,scores] = classify(newnet,img); %it will always match an image to a label 
+        [predict,scores] = classify(newnet,img) %it will always match an image to a label 
         t=t+1;
         for j=1:numberOfSubjects
             str1 = ['s0',int2str(j)];
-            if predict==str1&&max(scores)>0.9
+            if predict==str1&&max(scores)>0.45 %needs 0.5 for tara
                 count(j) = count(j) + 1;
                 %fprintf('The face detected is %s \n',nameofs01);
             end

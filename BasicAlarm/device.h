@@ -8,16 +8,18 @@ class Device {
     int pinNumber;
     bool status;
     String name;
+    int pinmode;
   public:
     void createDevice(int pinNo, bool currentStatus, int type, String ID);
-    bool getStatus();
     String getName();
+    void printOut();
 };
 
 class Sensor: public Device {
   public:
     bool readFromSensor();
     void updateStatus(bool update);
+    void printOut();
 };
 
 class Lock: public Device {

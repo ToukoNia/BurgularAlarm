@@ -8,7 +8,7 @@ class User {
     bool isAdmin;
   public:
     bool adminCheck();
-    bool checkName(String ID);
+    String getName();
     void updateCredentials(String ID, bool admin);
 };
 
@@ -27,5 +27,6 @@ class AuthenticationManager{
     int removeUser(String userID);
     void Setup(String newPin,int attempts, String userID);
     void resetAttempts();
+    void printOut();
 };
 #endif 

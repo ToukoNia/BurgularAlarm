@@ -1,0 +1,2 @@
+Solenoid,3
+Temp,17
