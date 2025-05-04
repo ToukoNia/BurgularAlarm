@@ -7,7 +7,6 @@ void SystemController::setup(){
   Alarm.setupAlarm();
   Users.Setup("Cheese",3,"Nia");
   manageUsers(1,"Mumin");
-  manageUsers(1,"Callum");
 }
 
 void SystemController::fullSystem(){
@@ -148,7 +147,9 @@ void SystemController::updateCredentials(){
   password=communicator.getSerial("New Password");
   message=communicator.getSerial("Attempt Change");
   Users.updateMaxAttempts(message.toInt());
-  Users.updatePin(password);
+  if(password != "0"){
+    Users.updatePin(password);
+  }
 }
 
 int SystemController::manageUsers(int type, String userID){ //0 denotes remove user, 1/2 refers to add user of admin level 0/1
