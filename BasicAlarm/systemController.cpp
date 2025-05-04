@@ -136,7 +136,6 @@ int SystemController::raiseAlarm(){  //simple code that manages maintaining and 
 }
 
 void SystemController::loadSystem(){
-  
   message=communicator.getSerial("Password");
   value=communicator.getSerial("Attempts").toInt();
   Users.updateMaxAttempts(value);
@@ -148,7 +147,7 @@ void SystemController::loadSystem(){
     Users.addUser(message, logic);
     message=communicator.getArrayValues();
   }
-
+  digitalWrite(6,1);
   message=communicator.getArrayValues();
   while(message!="Sensors End"){
     value=communicator.getArrayValues().toInt();
@@ -157,7 +156,7 @@ void SystemController::loadSystem(){
     Sensors.addSensor(value, logic, flag, message);
     message=communicator.getArrayValues();
   }
-
+  Locks.lockAll();
   message=communicator.getArrayValues();
   while(message!="Locks End"){
     value=communicator.getArrayValues().toInt();  
@@ -201,7 +200,6 @@ void SystemController::updateCredentials(){
   Users.updateMaxAttempts(message.toInt());
   Users.updatePin(password);
 }
-//DELETE THIS
 
 
 int SystemController::Login(){  //Login code to facilitate loggin in
