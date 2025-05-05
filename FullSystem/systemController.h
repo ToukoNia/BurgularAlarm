@@ -26,7 +26,6 @@ class SystemController {
     SerialController communicator;
     AuthenticationManager Users;
     String name; String password; String message; String temp; String temp1; String temp2;  //needed for all the serial readIns
-    long timeStamp=0; int flag; int value; int login; bool skipLogin=1; bool logic;
     long timeStamp=0; int flag; int value; int login; bool skipLogin=1; bool logic; int alarmDelay=20;
     int armSystem();
     int raiseAlarm();

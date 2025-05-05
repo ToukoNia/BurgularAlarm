@@ -1,6 +1,5 @@
 #include "systemController.h"
 #include "users.h"
-#define ALARM_DELAY 10
 SystemController sys;
 LockManager Locks;
 

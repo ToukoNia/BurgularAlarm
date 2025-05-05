@@ -6,7 +6,6 @@ void SystemController::setup(){
   Locks.addLock(3,"Solenoid");  //solenoid
   Alarm.setupAlarm();
   Users.Setup("Cheese",3,"Nia");
- 
 }
 
 void SystemController::fullSystem(){
@@ -96,7 +95,6 @@ int SystemController::armSystem(){
     }
   }
   timeStamp=millis();
-  while (timeStamp+ALARM_DELAY*1000>millis()&&!flag){ //delay to allow the user to get there in time, except if the flag is set (too many logins)
   while (timeStamp+alarmDelay*1000>millis()&&!flag){ //delay to allow the user to get there in time, except if the flag is set (too many logins)
     value=Login();
     if (value>0){
