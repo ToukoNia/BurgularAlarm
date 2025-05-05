@@ -16,7 +16,6 @@ class SerialController {
   public:
     bool checkSerial(String prompt);
     String getSerial(String prompt);
-    String getArrayValues();
 };
 
 class SystemController { 
@@ -27,20 +26,19 @@ class SystemController {
     SerialController communicator;
     AuthenticationManager Users;
     String name; String password; String message; String temp; String temp1; String temp2;  //needed for all the serial readIns
-    long timeStamp=0; int flag; int value; int login; bool skipLogin=1; bool logic;
-    int armSystem();
+    long timeStamp=0; int flag; int value; int login; bool skipLogin=1; bool logic; int i1; int i2; int i3;
+    int armSystem();  //Logics arming the system
     int raiseAlarm();
     void testSystem();
     int Login();
-    int manageUsers(int type, String userID);
-    bool updateDevices();
+    bool updateDevices(); //all subsequent private functions were functionalised to make code more readible, but are not used as functions. Manage getting data from SerialController and combining with other classes to aid full system
     void updateUsers();
     void updateCredentials();
-   
-  public:
-    void setup();
-    void fullSystem();
+    void createSystem();
     void loadSystem();
+  public:
+    void setup(); //creates the system
+    void fullSystem();  //runs the full system.
    
 };
 

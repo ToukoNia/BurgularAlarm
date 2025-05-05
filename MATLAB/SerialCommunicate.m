@@ -1,5 +1,5 @@
 clear arduino
-arduino = serialport("COM15",9600); %sets up serial object
+arduino = serialport("COM16",9600); %sets up serial object
 configureTerminator(arduino,"CR/LF"); %sets the line terminators to the correct type to ensure successful reading
 users=["Nia","Mumin","Callum","David","Aly"];
 %newnet=SimpleFaceRecognition(1,2); Sets up the network
@@ -25,15 +25,11 @@ SendFile(arduino, 'users.txt', "Users End");
 SendFile(arduino, 'sensors.txt', "Sensors End");
 
 SendFile(arduino, 'locks.txt', "Locks End");
-
-message=readline(arduino);
-while (message~="Users End")
-        disp(message);
-
-    message=readline(arduino);
+message=readline(arduino)
+while(message~="Credentials End")
+    message=readline(arduino)
 end
-while(1)
-end
+
 while (1) 
     message=readline(arduino);  %see what state the arduino is in, is neccessary to know when logging in, logging out, and if armed/disarmed
     if (message=="User Logged in") %need to add something like activating in 30 seconds, and then activate
@@ -68,7 +64,7 @@ while (1)
             communicate(arduino,"New Password",password);   %make this 0 if no password
             communicate(arduino,"Attempt Change",attempts);
         elseif systemChoice=="S"
-             %save(newnet);
+             save(newnet);
              saveInformation(arduino,"Credentials Start", "Credentials End","credentials.txt");
              saveInformation(arduino,"User List Start", "User List End","users.txt");
              saveInformation(arduino,"Sensor List Start", "Sensor List End","sensors.txt");
@@ -158,13 +154,13 @@ function saveToFile(fid,array)
 end
 
 function SendFile(arduino, FileName, EndPrompt)
-    FileID = fopen(FileName,'r');
-
-    line = fgetl(FileID)
+    FileID = fopen(FileName);
+    line = fgetl(FileID);
     while ischar(line)
-        writeline(arduino,string(line));
-        line = fgetl(FileID)
+        communicate(arduino,"NEXT",string(line));
+        line = fgetl(FileID);
     end
-    writeline(arduino,EndPrompt);
+    communicate(arduino,"NEXT",EndPrompt);
+    fclose(FileID);
 end
 

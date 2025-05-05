@@ -68,12 +68,6 @@ void AuthenticationManager::updatePin(String newPin){
   pin=newPin;
 }
 
-void AuthenticationManager::Setup(String newPin,int attempts, String userID){
-  addUser(userID,1);
-  updateMaxAttempts(attempts);
-  updatePin(newPin);
-}
-
 void AuthenticationManager::resetAttempts(){
   attemptNumber=0;
 }
