@@ -1,11 +1,11 @@
 #include "systemController.h"
 void SystemController::setup(){
-  Sensors.addSensor(2,1,2,"Window");  //window
-  Sensors.addSensor(4,0,2,"PIR Motion Detector");  //PIR  
-  Sensors.changeFobSensor(5,1,1,"Fob Button");  //button
-  Locks.addLock(3,"Solenoid");  //solenoid
-  Alarm.setupAlarm();
-  Users.Setup("Cheese",3,"Nia");
+  message=communicator.getSerial("Setup Option");
+  if (message=="LOAD"){
+    loadSystem();
+  } else {
+    createSystem();
+  }
 }
 
 void SystemController::fullSystem(){
@@ -120,7 +120,6 @@ int SystemController::armSystem(){
   }
 }
 
-
 int SystemController::raiseAlarm(){  //simple code that manages maintaining and creating the alarm (note, might be a better idea to destroy the alarm manager and to fit it here)
     Alarm.triggerAlarm();
     timeStamp=millis();
@@ -143,38 +142,59 @@ void SystemController::loadSystem(){
   Users.updateMaxAttempts(value);
   Users.updatePin(message);
 
-  message=communicator.getArrayValues();
+  //Loads the users
+  message="";
   while(message!="Users End"){
-    logic=bool(communicator.getArrayValues().toInt());
-    Users.addUser(message, logic);
-    message=communicator.getArrayValues();
-  }
-  digitalWrite(6,1);
-  message=communicator.getArrayValues();
-  while(message!="Sensors End"){
-    value=communicator.getArrayValues().toInt();
-    logic=bool(communicator.getArrayValues().toInt());
-    flag=communicator.getArrayValues().toInt();
-    Sensors.addSensor(value, logic, flag, message);
-    message=communicator.getArrayValues();
-  }
-  Locks.lockAll();
-  message=communicator.getArrayValues();
-  while(message!="Locks End"){
-    value=communicator.getArrayValues().toInt();  
-    Locks.addLock(value, message);
-    message=communicator.getArrayValues();
+    message=communicator.getSerial("NEXT");
+    i1 = message.indexOf(',');
+    if (i1 != -1) {
+      name = message.substring(0, i1);
+      logic = bool(message.substring(i1 + 1).toInt());
+      Users.addUser(name,logic);
+    }
   }
 
-  Sensors.displaySensorList(1);
-  Locks.displayLockList(1);
-  Users.printOut();
-  delay(10000);
+  //Loads the sensors
+  while(message!="Sensors End"){
+  message=communicator.getSerial("NEXT");
+  i1 = message.indexOf(',');
+    if (i1 != -1) {
+      i2 = message.indexOf(',',i1+1);
+      i3 = message.indexOf(',',i2+1);
+      name = message.substring(0, i1);
+      value = message.substring(i1+1,i2).toInt();
+      logic = message.substring(i2+1,i3).toInt();
+      flag = message.substring(i3+1).toInt();
+      Sensors.addSensor(value, logic, flag,name);
+    }
+  }
+
+  //Loads the locks
+  while(message!="Locks End"){
+    message=communicator.getSerial("NEXT");
+    Serial.println(message);
+    i1 = message.indexOf(',');
+    if (i1 != -1) {
+      name = message.substring(0, i1);
+      value = message.substring(i1 + 1).toInt();
+      Locks.addLock(value,name);
+    }
+  }
+  
+  Alarm.setupAlarm();
+  Sensors.changeFobSensor(5,1,1,"Fob Button");  //button
 }
 
+void SystemController::createSystem(){  //creates a basic system in the event of no system being loaded
+  updateCredentials();
+  updateUsers();  //need to also send add command
+  updateDevices();  //need to also send add command, needs to send over specified sensor/lock etc
+  updateDevices();  //need to also send add command, specify sensor/lock
+  Alarm.setupAlarm();
+  Sensors.changeFobSensor(5,1,1,"Fob Button");  //button
+}
 
-
-void SystemController::testSystem(){  //test system code will go here
+void SystemController::testSystem(){  //tests the system in line with the system requirements
   Serial.println("Testing the locks");
   Locks.lockAll();
   delay(TEST_LENGTH*1000);
@@ -289,9 +309,3 @@ String SerialController::getSerial(String prompt){  //gets the serial by prompti
   return message;
 }
 
-String SerialController::getArrayValues(){
-  while (!(Serial.available()>0));  //waits for a response (NOTE: this is only called when the system knows for sure its getting a response)
-  String message=Serial.readStringUntil(',');
-  message.trim();
-  return message;
-}
