@@ -65,6 +65,9 @@ void SystemController::fullSystem(){
         Users.printOut();
         Sensors.displaySensorList(1);
         Locks.displayLockList(1);
+      }else if (message=="UT"){
+        message=communicator.getSerial("Get Delay");
+        alarmDelay = message.toInt();
       }
     }
   } else if (login==-1){  //
@@ -94,6 +97,7 @@ int SystemController::armSystem(){
   }
   timeStamp=millis();
   while (timeStamp+ALARM_DELAY*1000>millis()&&!flag){ //delay to allow the user to get there in time, except if the flag is set (too many logins)
+  while (timeStamp+alarmDelay*1000>millis()&&!flag){ //delay to allow the user to get there in time, except if the flag is set (too many logins)
     value=Login();
     if (value>0){
       Locks.unlockAll();
