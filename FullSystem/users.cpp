@@ -8,12 +8,12 @@ bool User::adminCheck(){  //returns if user is admin
   return isAdmin;
 }
 
-String User::getName(){
+String User::getName(){ 
   return userID;
 }
 
-int AuthenticationManager::searchUsers(String UserID){  //hashmap later?
-  for (i=0; i < head; i++) {  //searches the users to find the index given a set user ID
+int AuthenticationManager::searchUsers(String UserID){ 
+  for (i=0; i < head; i++) {  //searches the users to find the index given a set user ID, useful for managing data incoming from MATLAB
     if (users[i].getName()==UserID){
       return i;
     }
@@ -23,10 +23,10 @@ int AuthenticationManager::searchUsers(String UserID){  //hashmap later?
 
 int AuthenticationManager::authenticate(String userID, String pinAttempt){  //authenticate the user and return if authenticated, with the level of permits
   currentUser=searchUsers(userID);
-  if (attemptNumber==maxAttempts){
+  if (attemptNumber==maxAttempts){  //checks to see if exceeded max attempts
     return -1;
   }
-  if (pin==pinAttempt&&(currentUser!=-1)){
+  if (pin==pinAttempt&&(currentUser!=-1)){  //if user recognised and pin is correct, return 1 (or 2 if the user is an admin)
     attemptNumber=0;
     return (1+users[currentUser].adminCheck());
   }
@@ -38,7 +38,7 @@ int AuthenticationManager::authenticate(String userID, String pinAttempt){  //au
 bool AuthenticationManager::addUser(String userID, bool admin){ //adds a user
   if(head<MAX_USERS){
     users[head] = User();
-    users[head].updateCredentials(userID, admin);  //change to constructors at somepoint
+    users[head].updateCredentials(userID, admin);  //same core logic as how the sensor and lock managers work
     head++;
     return 1;
   }
@@ -66,15 +66,15 @@ void AuthenticationManager::updateMaxAttempts(int attempts){  //allows for updat
   maxAttempts=attempts;
 }
 
-void AuthenticationManager::updatePin(String newPin){
+void AuthenticationManager::updatePin(String newPin){ //updates pin
   pin=newPin;
 }
 
-void AuthenticationManager::resetAttempts(){
+void AuthenticationManager::resetAttempts(){  //resets attempts (for if locked out etc)
   attemptNumber=0;
 }
 
-void AuthenticationManager::printOut(){
+void AuthenticationManager::printOut(){ //prints out the information needed to save to a file
   Serial.println("Credentials Start");
   while (!(Serial.available()>0));
   Serial.println(pin);

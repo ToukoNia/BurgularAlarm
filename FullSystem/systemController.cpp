@@ -1,5 +1,5 @@
 #include "systemController.h"
-void SystemController::setup(){
+void SystemController::setup(){ //sets up the system
   message=communicator.getSerial("Setup Option");
   if (message=="LOAD"){
     loadSystem();
@@ -9,7 +9,7 @@ void SystemController::setup(){
 }
 
 void SystemController::fullSystem(){
-  if(!skipLogin){
+  if(!skipLogin){ //allows for login to be skipped (used when logging in from disarming the system to prevent needing to sign in twice)
     login=Login();  //logs in
   } else{
     skipLogin=0;
@@ -19,13 +19,13 @@ void SystemController::fullSystem(){
     flag=1;
     while (flag){
       message=communicator.getSerial("User Logged in");
-      if (message=="A"){
-        flag=0;
-        login=armSystem();
-        skipLogin=1;
+      if (message=="A"){  
+        flag=0; //log the user out
+        login=armSystem();  //arm the system
+        skipLogin=1;  //skip nxt login as mentioned above
         
       } else if (message=="L"){
-        flag=0;
+        flag=0; //logout
       }
     }
     
@@ -33,7 +33,7 @@ void SystemController::fullSystem(){
     flag=1;
     while(flag){
       message=communicator.getSerial("Admin Logged in");
-      if (message=="A"){  //arm the system
+      if (message=="A"){  //arm the system, same as user
         login=armSystem();
         skipLogin=1;
         flag=0;
@@ -41,7 +41,7 @@ void SystemController::fullSystem(){
         testSystem();
       } else if (message=="U"){ //update credentials
         updateUsers();
-      } else if (message=="D"){
+      } else if (message=="D"){ //updates the devices, and then outputs to the MATLAB side
         if (updateDevices()){
           Serial.println("Operation Successful");
         } else {
@@ -50,32 +50,31 @@ void SystemController::fullSystem(){
       } else if (message=="C"){
         updateCredentials();
       }
-      else if (message=="L"){
+      else if (message=="L"){//logout
         flag=0;
       }
-      else if (message=="SE"){ //SEND SENSOR DATA
+      else if (message=="SE"){ //send sensor data in a limited format for input to a table
         Sensors.displaySensorList(0);
       }
-      else if (message=="LO"){ //SEND LOCK DATA
+      else if (message=="LO"){ //send lock data in a limited format for input to a table
         Locks.displayLockList(0);
-      } else if (message=="S"){
-        Users.printOut();
+      } else if (message=="S"){ 
+        Users.printOut(); //prints the credentials, then the users, then the sensors, then the locks in the full format. This is then saved by the MATLAB side into corresponding text files
         Sensors.displaySensorList(1);
         Locks.displayLockList(1);
-      }else if (message=="UT"){
+      }else if (message=="UT"){ //updates the delay
         message=communicator.getSerial("Get Delay");
         alarmDelay = message.toInt();
       }
     }
-  } else if (login==-1){  //
+  } else if (login==-1){  //if system locked out, wait for the full duration before allowing subsequent login attempts
     timeStamp=millis();
     while(millis()<timeStamp+LOCKOUT_TIME*1000){
       Serial.println("System Locked");
     }
-    Users.resetAttempts();
+    Users.resetAttempts();  //reset attempts
   }
 }
-
 
 int SystemController::armSystem(){  //arms the system in accordance to the system requirements
   Locks.lockAll();
@@ -84,18 +83,19 @@ int SystemController::armSystem(){  //arms the system in accordance to the syste
   while (!Sensors.checkSensors()&&!flag){ //loops until sensor checked, or login detected, or over login limit
     value=Login();
     if (value>0){
-      Locks.unlockAll();
+      Locks.unlockAll();  //successful logins turn off the alarm and logs out
       return value;
     } else if (value==-1){
       flag=1; //basically if too many logins set off alarm
-    }     
+    }    
+    //door and fob sensor 
     if (Sensors.checkFobSensor()){  //if button pushed unlock door
       Locks.unlockAll();
       lockTimeStamp=millis();
       logic=1;
     }
     if(logic){
-      if (millis()>lockTimeStamp+5000){ //5 seconds later
+      if (millis()>lockTimeStamp+5000){ //5 seconds later, relock the door
         Locks.lockAll();
         logic=0;
       }
@@ -123,11 +123,11 @@ int SystemController::armSystem(){  //arms the system in accordance to the syste
     }
   }
   value=raiseAlarm();
-  while(!(value>0)){
+  while(!(value>0)){  //in the event of still no login, stay till successful login.
     if (value>0){ //keep doors locked until login successful
       Locks.unlockAll();
       return value;
-    } else if (value==-1){
+    } else if (value==-1){  //reset attempts
       timeStamp=millis();
       while(millis()<timeStamp+LOCKOUT_TIME*1000){
         Serial.println("System Locked");
@@ -153,15 +153,15 @@ int SystemController::armSystem(){  //arms the system in accordance to the syste
 int SystemController::raiseAlarm(){  //simple code that manages maintaining and creating the alarm
     Alarm.triggerAlarm();
     timeStamp=millis();
-    while(millis()<timeStamp+ALARM_LENGTH*1000){
-      Alarm.maintainAlarm();
+    while(millis()<timeStamp+ALARM_LENGTH*1000){  
+      Alarm.maintainAlarm();  //flashes LED
       value=Login();
-      if (value==1){
+      if (value==1){  //if logged in, unlockAll and stop alarm
         Locks.unlockAll();
         Alarm.stopAlarm();
         return value;
       }
-      if (Sensors.checkFobSensor()){  //if button pushed unlock door
+      if (Sensors.checkFobSensor()){  //if button pushed unlock door, same as in arm system
         Locks.unlockAll();
         lockTimeStamp=millis();
         logic=1;
@@ -174,14 +174,14 @@ int SystemController::raiseAlarm(){  //simple code that manages maintaining and 
       }  
     }
     Alarm.stopAlarm(); 
-    return 0;
+    return 0; //if no login, return 0
 }
 
 void SystemController::loadSystem(){  //loads the system from files stored on the MATLAB side
   //loads the credentials
   updateCredentials();
 
-  //Loads the users
+  //Loads the users in the format "NAME,ADMIN_LEVEL"
   message="";
   while(message!="Users End"){
     message=communicator.getSerial("NEXT");
@@ -193,42 +193,42 @@ void SystemController::loadSystem(){  //loads the system from files stored on th
     }
   }
 
-  //Loads the sensors
+  //Loads the sensors in the format "NAME, PIN NUMBER, LOGIC, TYPE". Variable names are as follows purely as they are temp variables that were previously used to save on memory
   while(message!="Sensors End"){
   message=communicator.getSerial("NEXT");
   i1 = message.indexOf(',');
     if (i1 != -1) {
       i2 = message.indexOf(',',i1+1);
       i3 = message.indexOf(',',i2+1);
-      name = message.substring(0, i1);
-      value = message.substring(i1+1,i2).toInt();
+      name = message.substring(0, i1);  
+      value = message.substring(i1+1,i2).toInt(); //pin number
       logic = message.substring(i2+1,i3).toInt();
-      flag = message.substring(i3+1).toInt();
+      flag = message.substring(i3+1).toInt(); //type of device (ie input_pullup or input)
       Sensors.addSensor(value, logic, flag,name);
     }
   }
 
-  //Loads the locks
+  //Loads the locks in the format (Name,Pin number). Value was reused for pin number as it is a temporary variable
   while(message!="Locks End"){
     message=communicator.getSerial("NEXT");
     i1 = message.indexOf(',');
     if (i1 != -1) {
       name = message.substring(0, i1);
-      value = message.substring(i1 + 1).toInt();
+      value = message.substring(i1 + 1).toInt();  //pin number
       Locks.addLock(value,name);
     }
   }
   
-  Alarm.setupAlarm();
+  Alarm.setupAlarm(); //sets up the alarm
   Sensors.changeFobSensor(5,1,1,"Fob Button");  //button
 }
 
 void SystemController::createSystem(){  //creates a basic system in the event of no system being loaded
-  updateCredentials();
-  updateUsers();  //need to also send add command
-  updateDevices();  //need to also send add command, needs to send over specified sensor/lock etc
-  updateDevices();  //need to also send add command, specify sensor/lock
-  Alarm.setupAlarm();
+  updateCredentials();  //creates credentials
+  updateUsers();   //gets a singular user
+  updateDevices();   //gets a singular sensor (option selected MATLAB side)
+  updateDevices();  //gets a singular lock (option selected MATLAB side)
+  Alarm.setupAlarm(); 
   Sensors.changeFobSensor(5,1,1,"Fob Button");  //button
 }
 
@@ -238,17 +238,17 @@ void SystemController::testSystem(){  //tests the system in line with the system
   delay(TEST_LENGTH*1000);
   Locks.unlockAll();
   timeStamp=millis();
-  Serial.println("Testing the Alarm");
+  Serial.println("Testing the Alarm");  //outputs for MATLAB
   Alarm.triggerAlarm();
   timeStamp=millis();
-  while(millis()<timeStamp+TEST_LENGTH*1000){
+  while(millis()<timeStamp+TEST_LENGTH*1000){ //flashes LED
     Alarm.maintainAlarm();
   }
   Alarm.stopAlarm(); 
   timeStamp=millis();
     Serial.println("Testing the Sensors, trigger them to see on screen");
   delay(500);
-  while(millis()<timeStamp+2*TEST_LENGTH*1000){
+  while(millis()<timeStamp+2*TEST_LENGTH*1000){ 
     Sensors.testSensors();
   }
   Serial.println("Test Complete");
@@ -303,18 +303,18 @@ void SystemController::updateUsers(){
   }
 }
 
-bool SystemController::updateDevices(){ //might lowkey wanna switch this to be without so many temps lmao
+bool SystemController::updateDevices(){ //takes in the inputs from MATLAB to handle updating a device through the device managers. Temp variables are used throughout with comments for readibility.
   message=communicator.getSerial("Add or remove");
   if (message=="A"){
     message=communicator.getSerial("Sensor or Lock");  //gets the selected options from matlab
-    temp=communicator.getSerial("Pin Number");
+    temp=communicator.getSerial("Pin Number");  //holds the pin number
     name=communicator.getSerial("Name");
     if (message=="Sensor"){
-      temp1=communicator.getSerial("Logic");//1 for logic
-      temp2=communicator.getSerial("Standard or Pullup");//0 for pullup
+      temp1=communicator.getSerial("Logic");  //1 for logic of the sensor
+      temp2=communicator.getSerial("Standard or Pullup"); //0 for if the sensor is input pullup or 1 for pullup 
       return Sensors.addSensor(temp.toInt(), (temp1=="1"), (temp2=="1"+1), name);  
     } else {
-      return Locks.addLock(temp.toInt(),name);
+      return Locks.addLock(temp.toInt(),name);  //assigns the values
     }
   }
   else{
@@ -332,7 +332,7 @@ bool SystemController::updateDevices(){ //might lowkey wanna switch this to be w
   
 }
 
-bool SerialController::checkSerial(String prompt){  //checks the serial bus to see if there is a message and if that message equals 1
+bool SerialController::checkSerial(String prompt){  //checks the serial bus to see if there is a message and if that message equals 1, used for logging in
   Serial.println(prompt);
   if(Serial.available() > 0){
     message = Serial.readStringUntil('\n');

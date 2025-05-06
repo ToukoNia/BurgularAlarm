@@ -36,35 +36,35 @@ void Sensor::printOut(){  //extends device's function to prinout additional info
   Serial.print(","+String(status)+","+String(pinmode));
 }
 
-void Lock::lock(){
+void Lock::lock(){  //writes to a lock to tell it to lock
   status=1;
   digitalWrite(pinNumber,1);
 }
 
-void Lock::unlock(){
+void Lock::unlock(){  //writes to a lock to tell it to unlock
   status=0;
   digitalWrite(pinNumber,0);
 }
 
-void Buzzer::sound(){
+void Buzzer::sound(){ //writes to a buzzer to tell it to make sound until stopped
   status=1;
   analogWrite(pinNumber,20);
 }
 
-void Buzzer::stop(){
+void Buzzer::stop(){  //writes to a buzzer to tell it to stop sound
   status=0;
   analogWrite(pinNumber,0);
 }
 
-void LED::turnOn(){
+void LED::turnOn(){ //turns on an LED
   digitalWrite(pinNumber,1);
 }
 
-void LED::turnOff(){
+void LED::turnOff(){  //turns off an LED
   digitalWrite(pinNumber,0);
 }
 
-void LED::changeState(){
+void LED::changeState(){  //changes state of LED
   if (status){
     turnOff();
   } else {
