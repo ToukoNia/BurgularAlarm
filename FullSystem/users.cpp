@@ -81,7 +81,7 @@ void AuthenticationManager::printOut(){
   Serial.println("User List Start");
   while (!(Serial.available()>0));
   for (i=0;i<head;i++){
-    Serial.print(users[i].getName()); Serial.println(users[i].adminCheck());
+    Serial.println(users[i].getName()+","+users[i].adminCheck());
   }
   Serial.println("User List End");
 }

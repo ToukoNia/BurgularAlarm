@@ -53,12 +53,10 @@ void SystemController::fullSystem(){
       else if (message=="L"){
         flag=0;
       }
-      else if (message=="SE"){
-        //SEND SENSOR DATA
+      else if (message=="SE"){ //SEND SENSOR DATA
         Sensors.displaySensorList(0);
       }
-      else if (message=="LO"){
-        //SEND LOCK DATA
+      else if (message=="LO"){ //SEND LOCK DATA
         Locks.displayLockList(0);
       } else if (message=="S"){
         Users.printOut();
@@ -79,7 +77,7 @@ void SystemController::fullSystem(){
 }
 
 
-int SystemController::armSystem(){
+int SystemController::armSystem(){  //arms the system in accordance to the system requirements
   Locks.lockAll();
   flag=0;
   timeStamp=millis();
@@ -90,8 +88,17 @@ int SystemController::armSystem(){
       return value;
     } else if (value==-1){
       flag=1; //basically if too many logins set off alarm
-    } if (Sensors.checkFobSensor()){
+    }     
+    if (Sensors.checkFobSensor()){  //if button pushed unlock door
       Locks.unlockAll();
+      lockTimeStamp=millis();
+      logic=1;
+    }
+    if(logic){
+      if (millis()>lockTimeStamp+5000){ //5 seconds later
+        Locks.lockAll();
+        logic=0;
+      }
     }
   }
   timeStamp=millis();
@@ -102,25 +109,48 @@ int SystemController::armSystem(){
       return value;
     } else if (value==-1){
       flag=1;
-    }
-    if (Sensors.checkFobSensor()){
+    } 
+    if (Sensors.checkFobSensor()){  //if button pushed unlock door
       Locks.unlockAll();
-    }   
+      lockTimeStamp=millis();
+      logic=1;
+    }
+    if(logic){
+      if (millis()>lockTimeStamp+5000){ //5 seconds later
+        Locks.lockAll();
+        logic=0;
+      }
+    }
   }
   value=raiseAlarm();
-  if (value>0){
-    Locks.unlockAll();
-    return value;
-  } else if (value==-1){
-    timeStamp=millis();
-    while(millis()<timeStamp+LOCKOUT_TIME*1000){
-      Serial.println("System Locked");
+  while(!(value>0)){
+    if (value>0){ //keep doors locked until login successful
+      Locks.unlockAll();
+      return value;
+    } else if (value==-1){
+      timeStamp=millis();
+      while(millis()<timeStamp+LOCKOUT_TIME*1000){
+        Serial.println("System Locked");
+      }
+      Users.resetAttempts();
     }
-    Users.resetAttempts();
+    if (Sensors.checkFobSensor()){  //if button pushed unlock door
+      Locks.unlockAll();
+      lockTimeStamp=millis();
+      logic=1;
+    }
+    if(logic){
+      if (millis()>lockTimeStamp+5000){ //5 seconds later
+        Locks.lockAll();
+        logic=0;
+      }
+    }
+    value=Login();
   }
+  
 }
 
-int SystemController::raiseAlarm(){  //simple code that manages maintaining and creating the alarm (note, might be a better idea to destroy the alarm manager and to fit it here)
+int SystemController::raiseAlarm(){  //simple code that manages maintaining and creating the alarm
     Alarm.triggerAlarm();
     timeStamp=millis();
     while(millis()<timeStamp+ALARM_LENGTH*1000){
@@ -131,16 +161,25 @@ int SystemController::raiseAlarm(){  //simple code that manages maintaining and 
         Alarm.stopAlarm();
         return value;
       }
+      if (Sensors.checkFobSensor()){  //if button pushed unlock door
+        Locks.unlockAll();
+        lockTimeStamp=millis();
+        logic=1;
+      }
+      if(logic){
+        if (millis()>lockTimeStamp+5000){ //5 seconds later
+          Locks.lockAll();
+          logic=0;
+        }
+      }  
     }
     Alarm.stopAlarm(); 
     return 0;
 }
 
-void SystemController::loadSystem(){
-  message=communicator.getSerial("Password");
-  value=communicator.getSerial("Attempts").toInt();
-  Users.updateMaxAttempts(value);
-  Users.updatePin(message);
+void SystemController::loadSystem(){  //loads the system from files stored on the MATLAB side
+  //loads the credentials
+  updateCredentials();
 
   //Loads the users
   message="";
@@ -172,7 +211,6 @@ void SystemController::loadSystem(){
   //Loads the locks
   while(message!="Locks End"){
     message=communicator.getSerial("NEXT");
-    Serial.println(message);
     i1 = message.indexOf(',');
     if (i1 != -1) {
       name = message.substring(0, i1);
@@ -216,13 +254,16 @@ void SystemController::testSystem(){  //tests the system in line with the system
   Serial.println("Test Complete");
 }
 
-void SystemController::updateCredentials(){
+void SystemController::updateCredentials(){ //updates the password based on stuff from the GUI
   password=communicator.getSerial("New Password");
   message=communicator.getSerial("Attempt Change");
-  Users.updateMaxAttempts(message.toInt());
-  Users.updatePin(password);
+  if (message!="0"){  //flags for an unchanged password from the gui
+    Users.updateMaxAttempts(message.toInt());
+  }
+  if (password!="0"){
+    Users.updatePin(password);
+  }
 }
-
 
 int SystemController::Login(){  //Login code to facilitate loggin in
   if(communicator.checkSerial("Check Login")){
@@ -270,7 +311,7 @@ bool SystemController::updateDevices(){ //might lowkey wanna switch this to be w
     name=communicator.getSerial("Name");
     if (message=="Sensor"){
       temp1=communicator.getSerial("Logic");//1 for logic
-      temp2=communicator.getSerial("Standard or Pullup");//1 for pullup
+      temp2=communicator.getSerial("Standard or Pullup");//0 for pullup
       return Sensors.addSensor(temp.toInt(), (temp1=="1"), (temp2=="1"+1), name);  
     } else {
       return Locks.addLock(temp.toInt(),name);

@@ -1,6 +1,6 @@
 #include "device.h"
 
-void Device::createDevice(int pinNo, bool currentStatus, int type,String ID){
+void Device::createDevice(int pinNo, bool currentStatus, int type,String ID){ //creates a device and initialises it with the given properties needed for operation
   pinNumber=pinNo;
   status=currentStatus;
   name=ID;
@@ -15,23 +15,23 @@ void Device::createDevice(int pinNo, bool currentStatus, int type,String ID){
 }
 
 
-String Device::getName(){
+String Device::getName(){ //returns the device name, used for screen print outs
   return name;
 }
 
-void Device::printOut(){
-  Serial.print(String(pinNumber));//+","+pinstatus","+pinmode);
+void Device::printOut(){  //prints out the pin number of the device
+  Serial.print(String(pinNumber));
 }
 
 
-bool Sensor::readFromSensor(){
+bool Sensor::readFromSensor(){  //return if a sensor is active, with flipping the logic depending on if it is negatively or positively wired
   if (status==1){
     return !digitalRead(pinNumber);
   }
   return digitalRead(pinNumber);
 }
 
-void Sensor::printOut(){
+void Sensor::printOut(){  //extends device's function to prinout additional information needed for saving the file
   Device::printOut();
   Serial.print(","+String(status)+","+String(pinmode));
 }

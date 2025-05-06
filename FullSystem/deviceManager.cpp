@@ -41,7 +41,6 @@ bool SensorManager::checkSensors() {
   return 0;
 }
 
-
 void SensorManager::displaySensorList(bool infoLevel){  //these two output the list of names of the sensors and locks, with a start message and an end message
   Serial.println("Sensor List Start");
   while (!(Serial.available()>0));
@@ -54,7 +53,6 @@ void SensorManager::displaySensorList(bool infoLevel){  //these two output the l
   }
   Serial.println("Sensor List End");
 }
-
 
 void LockManager::displayLockList(bool infoLevel){
   Serial.println("Lock List Start");
