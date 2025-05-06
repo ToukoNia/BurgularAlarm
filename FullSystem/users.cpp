@@ -23,14 +23,15 @@ int AuthenticationManager::searchUsers(String UserID){  //hashmap later?
 
 int AuthenticationManager::authenticate(String userID, String pinAttempt){  //authenticate the user and return if authenticated, with the level of permits
   currentUser=searchUsers(userID);
+  if (attemptNumber==maxAttempts){
+    return -1;
+  }
   if (pin==pinAttempt&&(currentUser!=-1)){
     attemptNumber=0;
     return (1+users[currentUser].adminCheck());
   }
   attemptNumber++;
-  if (attemptNumber==maxAttempts){
-    return -1;
-  }
+ 
   return 0;
 }
 
@@ -61,6 +62,7 @@ int AuthenticationManager::removeUser(String userID){ //removes a user, and outp
 }
 
 void AuthenticationManager::updateMaxAttempts(int attempts){  //allows for updating the pin information to update the number of max attempts
+  attemptNumber=0;
   maxAttempts=attempts;
 }
 
@@ -78,6 +80,7 @@ void AuthenticationManager::printOut(){
   Serial.println(pin);
   Serial.println(maxAttempts);
   Serial.println("Credentials End");
+  while (!(Serial.available()>0));
   Serial.println("User List Start");
   while (!(Serial.available()>0));
   for (i=0;i<head;i++){
