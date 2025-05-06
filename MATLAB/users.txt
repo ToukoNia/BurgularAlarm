@@ -1,6 +1,5 @@
 Nia,1
-Mumin,0
+Mumin,1
 Callum,0
 David,0
 Aly,0
-Temp,7
